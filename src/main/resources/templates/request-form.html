@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>New Purchase Request</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body style="overflow-y: hidden">
+
+<div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" th:replace="~{fragments/sidebar :: sidebar}"></aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <h1>Create New Purchase Request</h1>
+            <div class="user-profile">
+                <span sec:authentication="principal.username">user@example.com</span>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn-logout">Logout</button>
+                </form>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="page-content">
+            <div class="form-container">
+                <!-- Flash Messages for Success/Error -->
+                <div th:if="${successMessage}" class="alert-flash alert-success-flash" th:text="${successMessage}"></div>
+                <div th:if="${errorMessage}" class="alert-flash alert-danger-flash" th:text="${errorMessage}"></div>
+
+                <form th:action="@{/requests/save}" th:object="${requestForm}" method="post">
+                    <!-- Section 1: General Request Information -->
+                    <div class="form-section">
+                        <h3>General Information</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="budgetCode">Budget Code</label>
+                                <select id="budgetCode" th:field="*{budgetCodeId}" required>
+                                    <option value="">Select a Budget Code</option>
+                                    <option th:each="code : ${formData.budgetCodes}"
+                                            th:value="${code.budgetCodeId}"
+                                            th:text="${code.code + ' - ' + code.description}"></option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="currency">Currency</label>
+                                <select id="currency" th:field="*{currencyId}" required>
+                                    <option value="">Select a Currency</option>
+                                    <option th:each="curr : ${formData.currencies}"
+                                            th:value="${curr.currencyId}"
+                                            th:text="${curr.currencyCode}"></option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Items -->
+                    <div class="form-section">
+                        <h3>Request Items</h3>
+                        <table class="item-table" id="item-table">
+                            <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th style="width: 15%;">Supplier</th>
+                                <th style="width: 10%;">Quantity</th>
+                                <th style="width: 10%;">Unit</th>
+                                <th style="width: 12%;">Unit Price</th>
+                                <th>Description</th>
+                                <th class="actions-cell">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- Thymeleaf loop to generate existing rows (initially one) -->
+                            <tr th:each="item, itemStat : *{items}">
+                                <td><input type="text" th:field="*{items[__${itemStat.index}__].itemName}" required /></td>
+                                <td>
+                                    <select th:field="*{items[__${itemStat.index}__].supplierId}" required>
+                                        <option value="">Select...</option>
+                                        <option th:each="sup : ${formData.suppliers}" th:value="${sup.supplierId}" th:text="${sup.supplierName}"></option>
+                                    </select>
+                                </td>
+                                <td><input type="number" th:field="*{items[__${itemStat.index}__].quantity}" required min="1" /></td>
+                                <td>
+                                    <select th:field="*{items[__${itemStat.index}__].unitId}" required>
+                                        <option value="">Select...</option>
+                                        <option th:each="unit : ${formData.units}" th:value="${unit.unitId}" th:text="${unit.unitName}"></option>
+                                    </select>
+                                </td>
+                                <td><input type="number" th:field="*{items[__${itemStat.index}__].unitPrice}" required step="0.01" min="0" /></td>
+                                <td><input type="text" th:field="*{items[__${itemStat.index}__].description}" /></td>
+                                <td class="actions-cell">
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">Remove</button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div style="margin-top: 15px;">
+                            <button type="button" class="btn btn-success" onclick="addRow()">Add Item</button>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Submit Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- JavaScript for dynamic rows -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // Pre-build a template row using Thymeleaf variables for the dropdowns
+    const suppliers = /*[[${formData.suppliers}]]*/ [];
+    const units = /*[[${formData.units}]]*/ [];
+
+    let supplierOptions = '<option value="">Select...</option>';
+    suppliers.forEach(sup => {
+        supplierOptions += `<option value="${sup.supplierId}">${sup.supplierName}</option>`;
+    });
+
+    let unitOptions = '<option value="">Select...</option>';
+    units.forEach(unit => {
+        unitOptions += `<option value="${unit.unitId}">${unit.unitName}</option>`;
+    });
+
+    function addRow() {
+        const tableBody = document.getElementById('item-table').getElementsByTagName('tbody')[0];
+        const newIndex = tableBody.rows.length;
+        const newRow = tableBody.insertRow();
+
+        newRow.innerHTML = `
+            <td><input type="text" name="items[${newIndex}].itemName" required /></td>
+            <td><select name="items[${newIndex}].supplierId" required>${supplierOptions}</select></td>
+            <td><input type="number" name="items[${newIndex}].quantity" required min="1" value="1" /></td>
+            <td><select name="items[${newIndex}].unitId" required>${unitOptions}</select></td>
+            <td><input type="number" name="items[${newIndex}].unitPrice" required step="0.01" min="0" value="0.00" /></td>
+            <td><input type="text" name="items[${newIndex}].description" /></td>
+            <td class="actions-cell">
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">Remove</button>
+            </td>
+        `;
+    }
+
+    function removeRow(button) {
+        const tableBody = document.getElementById('item-table').getElementsByTagName('tbody')[0];
+        // Don't remove the last row
+        if (tableBody.rows.length <= 1) {
+            alert("At least one item is required.");
+            return;
+        }
+        const row = button.parentNode.parentNode;
+        row.parentNode.removeChild(row);
+        // After removing, we should re-index the remaining rows to prevent gaps
+        updateRowIndexes();
+    }
+
+    function updateRowIndexes() {
+        const tableBody = document.getElementById('item-table').getElementsByTagName('tbody')[0];
+        for (let i = 0; i < tableBody.rows.length; i++) {
+            const row = tableBody.rows[i];
+            row.querySelectorAll('input, select').forEach(element => {
+                if (element.name) {
+                    element.name = element.name.replace(/items\[\d+\]/, `items[${i}]`);
+                }
+            });
+        }
+    }
+    /*]]>*/
+</script>
+
+</body>
+</html>

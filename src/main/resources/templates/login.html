@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polat Holding | Login</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="login-page-container">
+
+    <!-- Left Panel: Displays the background image via CSS -->
+    <div class="image-panel"></div>
+
+    <!-- Right Login Form Panel -->
+    <div class="login-panel">
+        <div class="login-form-container">
+            <!-- The logo replaces the old text heading -->
+            <img th:src="@{/images/logo.png}" alt="Polat Holding Logo" class="form-logo">
+            <h2>Procurement System</h2>
+            <p>Please sign in to continue</p>
+
+            <!-- Display error message if login fails -->
+            <div th:if="${param.error}" class="alert alert-danger">
+                Invalid email or password.
+            </div>
+            <!-- Display message on successful logout -->
+            <div th:if="${param.logout}" class="alert alert-success">
+                You have been logged out successfully.
+            </div>
+
+            <form th:action="@{/login}" method="post">
+                <div class="input-group">
+                    <input type="email" id="username" name="username" required="required" autocomplete="off">
+                    <label for="username">Email Address</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" name="password" required="required">
+                    <label for="password">Password</label>
+                </div>
+                <div class="form-options">
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember-me" name="remember-me">
+                        <label for="remember-me">Remember Me</label>
+                    </div>
+                    <a href="#">Forgot Password?</a>
+                </div>
+                <button type="submit" class="btn-login">LOGIN</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Procurement System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body style="overflow-y: hidden"> <!-- Prevent body scroll -->
+
+<div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" th:replace="~{fragments/sidebar :: sidebar}"></aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <h1>Dashboard</h1>
+            <div class="user-profile">
+                <!-- Display user's name -->
+                <span sec:authentication="principal.username">user@example.com</span>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn-logout">Logout</button>
+                </form>
+            </div>
+        </header>
+
+        <!-- Page Content with Table -->
+        <div class="page-content">
+            <table class="content-table">
+                <thead>
+                <tr>
+                    <th>Request ID</th>
+                    <th>Created By</th>
+                    <th>Department</th>
+                    <th>Created At</th>
+                    <th>Net Amount</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- Check if requests list is empty -->
+                <tr th:if="${requests.isEmpty()}">
+                    <td colspan="6" style="text-align: center;">No purchase requests found.</td>
+                </tr>
+                <!-- Loop through each request, using th:each on a wrapper element -->
+                <th:block th:each="request : ${requests}">
+                    <!-- The main data row, now clickable -->
+                    <tr class="clickable-row" th:attr="data-href=@{/requests/{id}(id=${request.requestId})}">
+                        <td th:text="${'#' + request.requestId}">#1001</td>
+                        <td th:text="${request.creatorFullName}">Ali Yılmaz</td>
+                        <td th:text="${request.departmentName}">IT</td>
+                        <td th:text="${#temporals.format(request.createdAt, 'dd-MMM-yyyy HH:mm')}"></td>
+                        <td th:text="${#numbers.formatDecimal(request.netAmount, 1, 'COMMA', 2, 'POINT') + ' ' + request.currencyCode}"></td>
+                        <td>
+                <span class="status-badge"
+                      th:classappend="${#strings.toLowerCase(request.status) == 'pending' ? 'status-pending' : (#strings.toLowerCase(request.status) == 'approved' ? 'status-approved' : 'status-rejected')}"
+                      th:text="${request.status}">
+                </span>
+                        </td>
+                    </tr>
+                    <!-- A second row, ONLY displayed if the request was rejected -->
+                    <tr th:if="${request.rejectReason != null and #strings.equals(request.status, 'Rejected')}" class="rejection-row">
+                        <td></td>
+                        <td colspan="5">
+                            <strong>Rejection Reason:</strong>
+                            <span style="color: #721c24;" th:text="${request.rejectReason}"></span>
+                        </td>
+                    </tr>
+                </th:block>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const rows = document.querySelectorAll("tr[data-href]");
+        rows.forEach(row => {
+            row.addEventListener("click", () => {
+                window.location.href = row.dataset.href;
+            });
+        });
+    });
+</script>
+</body>
+</html>

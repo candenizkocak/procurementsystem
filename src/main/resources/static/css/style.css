@@ -1,0 +1,587 @@
+/* General Body and Font Setup */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden; /* Prevents scrollbars on the main page */
+}
+
+/* Main container using CSS Grid for the two-panel layout */
+.login-page-container {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr; /* Two equal columns */
+    height: 100vh;
+}
+
+/* --- Left Image Panel --- */
+.image-panel {
+    /* This sets the background image you provided */
+    background-image: url('../images/login-background.jpg');
+    background-size: cover; /* Ensures the image covers the entire panel */
+    background-position: center; /* Centers the image */
+}
+
+/* --- Right Login Panel --- */
+.login-panel {
+    background-color: #ffffff; /* A clean white background for the form */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-form-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 40px;
+}
+
+/* Logo that appears above the form */
+.form-logo {
+    display: block;
+    max-width: 180px;
+    margin: 0 auto 40px auto; /* Centers the logo and adds space below */
+}
+
+.login-form-container h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.login-form-container p {
+    color: #6c757d;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 1rem;
+}
+
+
+/* Form Styling */
+.input-group {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px 0;
+    font-size: 16px;
+    color: #333;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    outline: none;
+    background: transparent;
+    transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+    border-bottom-color: #0056b3;
+}
+
+.input-group label {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    font-size: 16px;
+    color: #6c757d;
+    pointer-events: none;
+    transition: 0.3s ease all;
+}
+
+.input-group input:focus ~ label,
+.input-group input:valid ~ label {
+    top: -15px;
+    font-size: 12px;
+    color: #0056b3;
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    font-size: 14px;
+}
+
+.form-options .remember-me {
+    display: flex;
+    align-items: center;
+}
+
+.form-options label {
+    margin-left: 5px;
+    color: #666;
+}
+
+.form-options a {
+    color: #0056b3;
+    text-decoration: none;
+}
+
+.form-options a:hover {
+    text-decoration: underline;
+}
+
+.btn-login {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background: #003E51; /* Using the specified corporate color for the button */
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: opacity 0.3s;
+}
+
+.btn-login:hover {
+    opacity: 0.9;
+}
+
+/* Alert messages */
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.alert-danger {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+/* --- Responsive Design for Mobile --- */
+@media (max-width: 800px) {
+    .login-page-container {
+        grid-template-columns: 1fr; /* Stack columns on top of each other */
+    }
+
+    .image-panel {
+        /* Hide the large image on mobile to save space and data */
+        display: none;
+    }
+
+    .login-panel {
+        background-color: #f8f9fa; /* Use a light grey background on mobile */
+    }
+}
+
+/* Dashboard placeholder styles from before */
+.dashboard-container {
+    text-align: center;
+    padding: 50px;
+}
+.btn-logout {
+    padding: 10px 20px;
+    border: none;
+    background-color: #d9534f;
+    color: white;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.btn-logout:hover {
+    background-color: #c9302c;
+}
+
+.app-container {
+    display: flex;
+    height: 100vh;
+    background-color: #f4f7f6; /* A light background for the content area */
+}
+
+/* Sidebar Styling */
+.sidebar {
+    width: 260px;
+    background-color: #003E51; /* Corporate blue */
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    transition: width 0.3s;
+}
+
+.sidebar-header {
+    padding: 0 20px 20px 20px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-logo {
+    max-width: 40px;
+    margin-right: 15px;
+}
+
+.sidebar-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.nav-menu {
+    list-style: none;
+    padding: 20px 0;
+    margin: 0;
+    flex-grow: 1;
+}
+
+.nav-item a {
+    display: flex;
+    align-items: center;
+    padding: 15px 25px;
+    color: #e0e0e0;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.nav-item a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.nav-item.active a {
+    background-color: #0056b3;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Main Content Area */
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow-y: hidden;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    height: 80px;
+    box-sizing: border-box;
+}
+
+.header h1 {
+    font-size: 1.8rem;
+    color: #333;
+    margin: 0;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+}
+.user-profile span {
+    margin-right: 15px;
+    font-weight: 500;
+}
+
+/* Page content where the table will live */
+.page-content {
+    flex-grow: 1;
+    padding: 30px;
+    overflow-y: auto; /* Enable scrolling for the content area only */
+}
+
+/* Table Styling */
+.content-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden; /* Important for border-radius on table */
+}
+
+.content-table thead tr {
+    background-color: #003E51;
+    color: #ffffff;
+    text-align: left;
+    font-weight: 600;
+}
+
+.content-table th,
+.content-table td {
+    padding: 15px 20px;
+}
+
+.content-table tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.content-table tbody tr:nth-of-type(even) {
+    background-color: #f9f9f9;
+}
+
+.content-table tbody tr:last-of-type {
+    border-bottom: 2px solid #003E51;
+}
+
+.content-table tbody tr:hover {
+    background-color: #f1f1f1;
+    cursor: pointer;
+}
+
+/* Status Badge Styles */
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-pending {
+    background-color: #fff0c1;
+    color: #8a6d3b;
+}
+
+.status-approved {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-rejected {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.sidebar-main-logo {
+    max-width: 160px; /* Adjust size as needed */
+    margin: 10px auto; /* Center the logo */
+    display: block;
+}
+.form-container {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.form-section {
+    margin-bottom: 25px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #e9ecef;
+}
+.form-section:last-of-type {
+    border-bottom: none;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+}
+
+.form-group select,
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1rem;
+    box-sizing: border-box; /* Important for padding */
+}
+
+/* Item Table Styles */
+.item-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+.item-table th, .item-table td {
+    padding: 8px;
+    text-align: left;
+    border: 1px solid #e9ecef;
+}
+.item-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+.item-table td input, .item-table td select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+.item-table td.actions-cell {
+    width: 100px;
+    text-align: center;
+}
+
+/* Action Buttons */
+.btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    border: none;
+    transition: background-color 0.2s;
+}
+.btn-primary {
+    background-color: #0056b3;
+    color: white;
+}
+.btn-primary:hover {
+    background-color: #004494;
+}
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+.btn-success:hover {
+    background-color: #218838;
+}
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+.btn-danger:hover {
+    background-color: #c82333;
+}
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+}
+.form-actions {
+    margin-top: 20px;
+    text-align: right;
+}
+
+/* Flash message alerts */
+.alert-flash {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    font-size: 1rem;
+    text-align: center;
+}
+.alert-success-flash {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+.alert-danger-flash {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+.actions-container {
+    display: flex;
+    gap: 8px; /* Space between buttons */
+}
+
+/* Modal styles for the rejection reason */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5); /* Black with opacity */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 25px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e5e5;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #000;
+    text-decoration: none;
+}
+
+.modal-body textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    resize: vertical;
+}
+
+.modal-footer {
+    text-align: right;
+    margin-top: 20px;
+}
+.clickable-row {
+    cursor: pointer;
+}
+.rejection-row {
+    background-color: #f8d7da !important;
+    font-size: 0.9em;
+}
+.rejection-row td {
+    padding-top: 5px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e6c8cb;
+}
