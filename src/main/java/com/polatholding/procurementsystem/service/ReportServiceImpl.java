@@ -4,6 +4,9 @@ import com.polatholding.procurementsystem.dto.BudgetStatusDto;
 import com.polatholding.procurementsystem.model.BudgetCode;
 import com.polatholding.procurementsystem.repository.BudgetCodeRepository;
 import com.polatholding.procurementsystem.repository.PurchaseRequestRepository;
+import com.polatholding.procurementsystem.repository.ExchangeRateRepository;
+import com.polatholding.procurementsystem.model.PurchaseRequest;
+import com.polatholding.procurementsystem.model.ExchangeRate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,10 +20,14 @@ public class ReportServiceImpl implements ReportService {
 
     private final BudgetCodeRepository budgetCodeRepository;
     private final PurchaseRequestRepository purchaseRequestRepository;
+    private final ExchangeRateRepository exchangeRateRepository;
 
-    public ReportServiceImpl(BudgetCodeRepository budgetCodeRepository, PurchaseRequestRepository purchaseRequestRepository) {
+    public ReportServiceImpl(BudgetCodeRepository budgetCodeRepository,
+                             PurchaseRequestRepository purchaseRequestRepository,
+                             ExchangeRateRepository exchangeRateRepository) {
         this.budgetCodeRepository = budgetCodeRepository;
         this.purchaseRequestRepository = purchaseRequestRepository;
+        this.exchangeRateRepository = exchangeRateRepository;
     }
 
     @Override
@@ -35,7 +42,22 @@ public class ReportServiceImpl implements ReportService {
             dto.setBudgetCode(budget.getCode());
             dto.setYear(budget.getYear());
 
-            BigDecimal consumedAmount = purchaseRequestRepository.getConsumedAmountForBudget(budget.getBudgetCodeId());
+            BigDecimal consumedAmount = BigDecimal.ZERO;
+            for (PurchaseRequest pr : purchaseRequestRepository.findApprovedByBudget(budget.getBudgetCodeId())) {
+                BigDecimal value;
+                if ("TRY".equalsIgnoreCase(pr.getCurrency().getCurrencyCode())) {
+                    value = pr.getNetAmount();
+                } else {
+                    ExchangeRate rate = exchangeRateRepository
+                            .findTopByCurrencyIdAndDateLessThanEqualOrderByDateDesc(
+                                    pr.getCurrency().getCurrencyId(),
+                                    pr.getCreatedAt().toLocalDate())
+                            .orElseThrow(() -> new IllegalStateException(
+                                    "Exchange rate not found for currency code: " + pr.getCurrency().getCurrencyCode()));
+                    value = pr.getNetAmount().multiply(rate.getRate());
+                }
+                consumedAmount = consumedAmount.add(value);
+            }
             BigDecimal currentAmount = budget.getBudgetAmount();
             BigDecimal initialAmount = currentAmount.add(consumedAmount);
 

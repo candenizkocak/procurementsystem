@@ -59,6 +59,11 @@ public interface PurchaseRequestRepository extends JpaRepository<PurchaseRequest
     @Query("SELECT COALESCE(SUM(pr.netAmount), 0) FROM PurchaseRequest pr WHERE pr.budgetCode.id = :budgetCodeId AND pr.status = 'Approved'")
     BigDecimal getConsumedAmountForBudget(@Param("budgetCodeId") Integer budgetCodeId);
 
+    @Query("SELECT pr FROM PurchaseRequest pr " +
+            "JOIN FETCH pr.currency " +
+            "WHERE pr.budgetCode.id = :budgetCodeId AND pr.status = 'Approved'")
+    List<PurchaseRequest> findApprovedByBudget(@Param("budgetCodeId") Integer budgetCodeId);
+
     @Query(value = "SELECT pr.* FROM PurchaseRequests pr " +
             "JOIN PurchaseRequestItems pri ON pr.RequestID = pri.RequestID " +
             "WHERE FREETEXT((pri.ItemName, pri.Description), :searchTerm)",
