@@ -19,11 +19,11 @@ import java.util.List;
 public class ApprovalController {
 
     private final PurchaseRequestService purchaseRequestService;
-    private final ApprovalService approvalService; // <-- Inject new service
+    private final ApprovalService approvalService;
 
     public ApprovalController(PurchaseRequestService purchaseRequestService, ApprovalService approvalService) {
         this.purchaseRequestService = purchaseRequestService;
-        this.approvalService = approvalService; // <-- Initialize in constructor
+        this.approvalService = approvalService;
     }
 
     @GetMapping
@@ -47,8 +47,23 @@ public class ApprovalController {
             redirectAttributes.addFlashAttribute("successMessage", "Decision processed successfully!");
 
         } catch (Exception e) {
-            // Log the exception e
             redirectAttributes.addFlashAttribute("errorMessage", "Error processing decision: " + e.getMessage());
+        }
+
+        return "redirect:/approvals";
+    }
+
+    @PostMapping("/return")
+    public String returnRequestForEdit(@RequestParam int requestId,
+                                       @RequestParam String comments,
+                                       Principal principal,
+                                       RedirectAttributes redirectAttributes) {
+        try {
+            String userEmail = principal.getName();
+            approvalService.returnForEdit(requestId, userEmail, comments);
+            redirectAttributes.addFlashAttribute("successMessage", "Request #" + requestId + " has been returned to the creator.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error returning request: " + e.getMessage());
         }
 
         return "redirect:/approvals";

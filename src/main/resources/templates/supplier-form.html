@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>New Supplier</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body style="overflow-y: hidden">
+
+<div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" th:replace="~{fragments/sidebar :: sidebar}"></aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <h1>Add New Supplier</h1>
+            <div class="user-profile">
+                <span sec:authentication="principal.username">user@example.com</span>
+                <form th:action="@{/logout}" method="post"><button type="submit" class="btn-logout">Logout</button></form>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="page-content">
+            <div class="form-container">
+                <form th:action="@{/suppliers/save}" th:object="${supplierFormDto}" method="post">
+                    <div class="form-section">
+                        <h3>Supplier Details</h3>
+                        <div class="form-grid">
+                            <!-- Supplier Name -->
+                            <div class="form-group">
+                                <label for="supplierName">Supplier Name</label>
+                                <input type="text" id="supplierName" th:field="*{supplierName}" required>
+                                <small class="text-danger" th:if="${#fields.hasErrors('supplierName')}" th:errors="*{supplierName}"></small>
+                            </div>
+
+                            <!-- Contact Person -->
+                            <div class="form-group">
+                                <label for="contactPerson">Contact Person</label>
+                                <input type="text" id="contactPerson" th:field="*{contactPerson}">
+                                <small class="text-danger" th:if="${#fields.hasErrors('contactPerson')}" th:errors="*{contactPerson}"></small>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" th:field="*{email}">
+                                <small class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></small>
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="form-group">
+                                <label for="phone">Phone</label>
+                                <!--
+                                  THE FIX: Changed type to "text" and added a pattern for validation.
+                                  This provides better user experience than type="number" for phone fields.
+                                -->
+                                <input type="text" id="phone" th:field="*{phone}"
+                                       pattern="[0-9\s\+\-\(\)]*"
+                                       title="Please enter a valid phone number.">
+                                <small class="text-danger" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Address Information</h3>
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <textarea id="address" th:field="*{address}" rows="3" style="min-height: auto; resize: vertical;"></textarea>
+                            <small class="text-danger" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></small>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <a th:href="@{/suppliers}" class="btn btn-secondary" style="background-color: #6c757d; color: white;">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Submit for Approval</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

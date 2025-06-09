@@ -5,7 +5,7 @@
     <title>Dashboard - Procurement System</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body style="overflow-y: hidden"> <!-- Prevent body scroll -->
+<body style="overflow-y: hidden">
 
 <div class="app-container">
     <!-- Sidebar Navigation -->
@@ -17,7 +17,6 @@
         <header class="header">
             <h1>Dashboard</h1>
             <div class="user-profile">
-                <!-- Display user's name -->
                 <span sec:authentication="principal.username">user@example.com</span>
                 <form th:action="@{/logout}" method="post">
                     <button type="submit" class="btn-logout">Logout</button>
@@ -27,6 +26,9 @@
 
         <!-- Page Content with Table -->
         <div class="page-content">
+            <div th:if="${successMessage}" class="alert-flash alert-success-flash" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert-flash alert-danger-flash" th:text="${errorMessage}"></div>
+
             <table class="content-table">
                 <thead>
                 <tr>
@@ -36,16 +38,14 @@
                     <th>Created At</th>
                     <th>Net Amount</th>
                     <th>Status</th>
+                    <th>Actions</th> <!-- NEW ACTIONS COLUMN -->
                 </tr>
                 </thead>
                 <tbody>
-                <!-- Check if requests list is empty -->
                 <tr th:if="${requests.isEmpty()}">
-                    <td colspan="6" style="text-align: center;">No purchase requests found.</td>
+                    <td colspan="7" style="text-align: center;">No purchase requests found.</td>
                 </tr>
-                <!-- Loop through each request, using th:each on a wrapper element -->
                 <th:block th:each="request : ${requests}">
-                    <!-- The main data row, now clickable -->
                     <tr class="clickable-row" th:attr="data-href=@{/requests/{id}(id=${request.requestId})}">
                         <td th:text="${'#' + request.requestId}">#1001</td>
                         <td th:text="${request.creatorFullName}">Ali Yılmaz</td>
@@ -53,17 +53,30 @@
                         <td th:text="${#temporals.format(request.createdAt, 'dd-MMM-yyyy HH:mm')}"></td>
                         <td th:text="${#numbers.formatDecimal(request.netAmount, 1, 'COMMA', 2, 'POINT') + ' ' + request.currencyCode}"></td>
                         <td>
-                <span class="status-badge"
-                      th:classappend="${#strings.toLowerCase(request.status) == 'pending' ? 'status-pending' : (#strings.toLowerCase(request.status) == 'approved' ? 'status-approved' : 'status-rejected')}"
-                      th:text="${request.status}">
-                </span>
+                            <span class="status-badge"
+                                  th:classappend="${#strings.toLowerCase(request.status).replace(' ', '-')} == 'pending' ? 'status-pending' :
+                                                 (${#strings.toLowerCase(request.status).replace(' ', '-')} == 'approved' ? 'status-approved' :
+                                                 (${#strings.toLowerCase(request.status).replace(' ', '-')} == 'rejected' ? 'status-rejected' :
+                                                 'status-returned-for-edit'))"
+                                  th:text="${request.status}">
+                            </span>
+                        </td>
+                        <!-- NEW LOGIC FOR ACTION BUTTON -->
+                        <td>
+                            <a th:if="${#strings.equals(request.status, 'Returned for Edit') and #authentication.principal.userId == request.creatorId}"
+                               th:href="@{/requests/{id}/edit(id=${request.requestId})}"
+                               class="btn btn-warning btn-sm"
+                               onclick="event.stopPropagation();"> <!-- Stop row click -->
+                                Edit
+                            </a>
                         </td>
                     </tr>
-                    <!-- A second row, ONLY displayed if the request was rejected -->
-                    <tr th:if="${request.rejectReason != null and #strings.equals(request.status, 'Rejected')}" class="rejection-row">
+                    <!-- Show rejection/return reason in a separate row -->
+                    <tr th:if="${request.rejectReason != null and (#strings.equals(request.status, 'Rejected') or #strings.equals(request.status, 'Returned for Edit'))}"
+                        class="rejection-row">
                         <td></td>
-                        <td colspan="5">
-                            <strong>Rejection Reason:</strong>
+                        <td colspan="6">
+                            <strong>Reason:</strong>
                             <span style="color: #721c24;" th:text="${request.rejectReason}"></span>
                         </td>
                     </tr>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 
 <!-- Define the fragment with th:fragment -->
@@ -8,8 +8,7 @@
         <img th:src="@{/images/logo-white.png}" alt="Polat Holding Logo" class="sidebar-main-logo">
     </div>
     <ul class="nav-menu">
-        <!-- Check against the 'currentUrl' model attribute provided by GlobalControllerAdvice -->
-        <li class="nav-item" th:classappend="${currentUrl == '/' or #strings.startsWith(currentUrl, '/dashboard')} ? 'active' : ''">
+        <li class="nav-item" th:classappend="${#strings.startsWith(currentUrl, '/dashboard')} ? 'active' : ''">
             <a th:href="@{/dashboard}">Dashboard</a>
         </li>
         <li class="nav-item" th:classappend="${#strings.startsWith(currentUrl, '/requests')} ? 'active' : ''">
@@ -17,6 +16,14 @@
         </li>
         <li class="nav-item" th:classappend="${#strings.startsWith(currentUrl, '/approvals')} ? 'active' : ''">
             <a th:href="@{/approvals}">Approvals</a>
+        </li>
+        <li class="nav-item" th:classappend="${#strings.startsWith(currentUrl, '/suppliers')} ? 'active' : ''">
+            <a th:href="@{/suppliers}">Suppliers</a>
+        </li>
+        <!-- NEW BUDGETS LINK (Visible only to Finance role) -->
+        <li class="nav-item" th:classappend="${#strings.startsWith(currentUrl, '/budgets')} ? 'active' : ''"
+            sec:authorize="hasRole('Finance')">
+            <a th:href="@{/budgets}">Budgets</a>
         </li>
         <li class="nav-item"><a href="#">Reports</a></li>
         <li class="nav-item"><a href="#">Admin</a></li>

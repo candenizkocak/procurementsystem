@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Access Denied</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body style="overflow-y: hidden">
+
+<div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" th:replace="~{fragments/sidebar :: sidebar}"></aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <h1>Access Denied</h1>
+            <div class="user-profile">
+                <span sec:authentication="principal.username">user@example.com</span>
+                <form th:action="@{/logout}" method="post"><button type="submit" class="btn-logout">Logout</button></form>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="page-content">
+            <div class="form-container" style="text-align: center; padding: 50px;">
+                <h2 style="color: #dc3545; font-size: 2rem;">Forbidden (403)</h2>
+                <p style="font-size: 1.2rem; margin-top: 20px;">
+                    You do not have the necessary permissions to access this page.
+                </p>
+                <p style="margin-top: 10px; color: #6c757d;">
+                    If you believe this is an error, please contact the system administrator.
+                </p>
+                <div style="margin-top: 40px;">
+                    <a th:href="@{/dashboard}" class="btn btn-primary">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

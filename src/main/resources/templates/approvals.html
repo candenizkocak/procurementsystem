@@ -37,7 +37,7 @@
                     <th>Created At</th>
                     <th>Net Amount</th>
                     <th>Status</th>
-                    <th style="width: 20%;">Actions</th>
+                    <th style="width: 25%;">Actions</th> <!-- Increased width for new button -->
                 </tr>
                 </thead>
                 <tbody>
@@ -53,22 +53,25 @@
                     <td th:text="${#numbers.formatDecimal(request.netAmount, 1, 'COMMA', 2, 'POINT') + ' ' + request.currencyCode}"></td>
                     <td><span class="status-badge status-pending" th:text="${request.status}"></span></td>
                     <td>
-                        <!-- NEW: Self-approval check using Thymeleaf variables -->
                         <div th:with="isSelfApproval=${#authentication.principal.userId == request.creatorId}">
                             <div class="actions-container" th:if="${not isSelfApproval}">
-                                <!-- Approve Button (Form submission) -->
+                                <!-- Approve Button -->
                                 <form th:action="@{/approvals/process}" method="post" onclick="event.stopPropagation();">
                                     <input type="hidden" name="requestId" th:value="${request.requestId}" />
                                     <input type="hidden" name="decision" value="approve" />
                                     <button type="submit" class="btn btn-success btn-sm">Approve</button>
                                 </form>
-                                <!-- Reject Button (Opens Modal) -->
+                                <!-- NEW 'Return for Edit' Button -->
+                                <button type="button" class="btn btn-warning btn-sm"
+                                        th:attr="onclick=|openReturnModal('${request.requestId}'); event.stopPropagation();|">
+                                    Return
+                                </button>
+                                <!-- Reject Button -->
                                 <button type="button" class="btn btn-danger btn-sm"
                                         th:attr="onclick=|openRejectModal('${request.requestId}'); event.stopPropagation();|">
                                     Reject
                                 </button>
                             </div>
-                            <!-- Display a message if it's a self-approval case -->
                             <div th:if="${isSelfApproval}">
                                 <span style="font-style: italic; color: #6c757d;">Self-approval not allowed</span>
                             </div>
@@ -83,7 +86,6 @@
 
 <!-- Rejection Modal -->
 <div id="rejectModal" class="modal">
-    <!-- ... Modal content is unchanged ... -->
     <div class="modal-content">
         <div class="modal-header">
             <h2>Reason for Rejection</h2>
@@ -104,7 +106,29 @@
     </div>
 </div>
 
-<!-- JavaScript for Modal and Clickable Rows -->
+<!-- NEW 'Return for Edit' Modal -->
+<div id="returnModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Return for Edit</h2>
+            <span class="close-button" onclick="closeReturnModal()">×</span>
+        </div>
+        <form id="returnForm" th:action="@{/approvals/return}" method="post">
+            <div class="modal-body">
+                <input type="hidden" name="requestId" id="returnRequestId" />
+                <label for="returnComments">Please provide comments for the creator:</label>
+                <textarea id="returnComments" name="comments" required minlength="10"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeReturnModal()">Cancel</button>
+                <button type="submit" class="btn btn-warning">Return to Creator</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- JavaScript for Modals and Clickable Rows -->
 <script>
     // Clickable row script
     document.addEventListener("DOMContentLoaded", () => {
@@ -115,24 +139,43 @@
         });
     });
 
-    // Modal script (unchanged)
-    const modal = document.getElementById('rejectModal');
+    // Rejection Modal script
+    const rejectModal = document.getElementById('rejectModal');
     const rejectRequestIdInput = document.getElementById('rejectRequestId');
     const rejectReasonTextarea = document.getElementById('rejectReason');
 
     function openRejectModal(requestId) {
         rejectRequestIdInput.value = requestId;
         rejectReasonTextarea.value = '';
-        modal.style.display = "block";
+        rejectModal.style.display = "block";
     }
 
     function closeRejectModal() {
-        modal.style.display = "none";
+        rejectModal.style.display = "none";
     }
 
+    // NEW 'Return' Modal script
+    const returnModal = document.getElementById('returnModal');
+    const returnRequestIdInput = document.getElementById('returnRequestId');
+    const returnCommentsTextarea = document.getElementById('returnComments');
+
+    function openReturnModal(requestId) {
+        returnRequestIdInput.value = requestId;
+        returnCommentsTextarea.value = '';
+        returnModal.style.display = "block";
+    }
+
+    function closeReturnModal() {
+        returnModal.style.display = "none";
+    }
+
+    // Close modals if user clicks outside of them
     window.onclick = function(event) {
-        if (event.target == modal) {
+        if (event.target === rejectModal) {
             closeRejectModal();
+        }
+        if (event.target === returnModal) {
+            closeReturnModal();
         }
     }
 </script>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Budget Management</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body style="overflow-y: hidden">
+
+<div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" th:replace="~{fragments/sidebar :: sidebar}"></aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <h1>Budget Management</h1>
+            <div class="user-profile">
+                <span sec:authentication="principal.username">user@example.com</span>
+                <form th:action="@{/logout}" method="post"><button type="submit" class="btn-logout">Logout</button></form>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="page-content">
+            <!-- Action Button to create a new budget -->
+            <div style="margin-bottom: 20px; text-align: right;">
+                <a th:href="@{/budgets/new}" class="btn btn-primary">Add New Budget</a>
+            </div>
+
+            <!-- Flash Messages -->
+            <div th:if="${successMessage}" class="alert-flash alert-success-flash" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert-flash alert-danger-flash" th:text="${errorMessage}"></div>
+
+            <table class="content-table">
+                <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Department</th>
+                    <th>Year</th>
+                    <th>Budget Amount</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${budgets.isEmpty()}">
+                    <td colspan="7" style="text-align: center;">No budgets found.</td>
+                </tr>
+                <tr th:each="budget : ${budgets}">
+                    <td th:text="${budget.code}"></td>
+                    <td th:text="${budget.departmentName}"></td>
+                    <td th:text="${budget.year}"></td>
+                    <td th:text="${#numbers.formatDecimal(budget.budgetAmount, 1, 'COMMA', 2, 'POINT') + ' TRY'}"></td>
+                    <td th:text="${budget.description}"></td>
+                    <td>
+                        <span class="status-badge"
+                              th:classappend="${budget.isActive} ? 'status-approved' : 'status-rejected'"
+                              th:text="${budget.isActive} ? 'Active' : 'Inactive'">
+                        </span>
+                    </td>
+                    <td>
+                        <a th:href="@{/budgets/{id}/edit(id=${budget.budgetCodeId})}" class="btn btn-warning btn-sm">Edit</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

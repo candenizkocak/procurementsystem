@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
@@ -14,7 +15,6 @@ public interface PurchaseRequestRepository extends JpaRepository<PurchaseRequest
 
     @Query("SELECT pr FROM PurchaseRequest pr " +
             "JOIN FETCH pr.createdByUser u " +
-            "LEFT JOIN FETCH u.roles " +
             "JOIN FETCH pr.department " +
             "JOIN FETCH pr.currency " +
             "ORDER BY pr.createdAt DESC")
@@ -22,16 +22,12 @@ public interface PurchaseRequestRepository extends JpaRepository<PurchaseRequest
 
     @Query("SELECT pr FROM PurchaseRequest pr " +
             "JOIN FETCH pr.createdByUser u " +
-            "LEFT JOIN FETCH u.roles " +
             "JOIN FETCH pr.department " +
             "JOIN FETCH pr.currency " +
             "WHERE u.userId = :userId " +
             "ORDER BY pr.createdAt DESC")
     List<PurchaseRequest> findByCreatorIdWithDetails(@Param("userId") Integer userId);
 
-    /**
-     * NEW METHOD: Finds requests waiting at Level 1 for a specific department manager.
-     */
     @Query("SELECT pr FROM PurchaseRequest pr " +
             "JOIN FETCH pr.createdByUser " +
             "JOIN FETCH pr.department d " +
@@ -47,4 +43,15 @@ public interface PurchaseRequestRepository extends JpaRepository<PurchaseRequest
             "WHERE pr.status = 'Pending' AND a.requiredRole.id IN :roleIds " +
             "ORDER BY pr.createdAt ASC")
     List<PurchaseRequest> findPendingApprovalsByRoleIds(@Param("roleIds") Set<Integer> roleIds);
+
+    @Query("SELECT pr FROM PurchaseRequest pr " +
+            "JOIN FETCH pr.createdByUser " +
+            "JOIN FETCH pr.department " +
+            "JOIN FETCH pr.currency " +
+            "JOIN FETCH pr.budgetCode " +
+            "LEFT JOIN FETCH pr.items i " +
+            "LEFT JOIN FETCH i.supplier " +
+            "LEFT JOIN FETCH i.unit " +
+            "WHERE pr.requestId = :requestId")
+    Optional<PurchaseRequest> findByIdWithAllDetails(@Param("requestId") Integer requestId);
 }

@@ -1,5 +1,6 @@
 package com.polatholding.procurementsystem.service;
 
+import com.polatholding.procurementsystem.exception.InsufficientBudgetException;
 import com.polatholding.procurementsystem.model.*;
 import com.polatholding.procurementsystem.repository.*;
 import org.springframework.security.access.AccessDeniedException;
@@ -17,7 +18,8 @@ public class ApprovalServiceImpl implements ApprovalService {
     private final UserRepository userRepository;
     private final ApprovalRepository approvalRepository;
     private final ExchangeRateRepository exchangeRateRepository;
-    private final ApprovalStepRepository approvalStepRepository; // <-- RE-ADD THIS REPOSITORY
+    private final ApprovalStepRepository approvalStepRepository;
+    private final BudgetCodeRepository budgetCodeRepository;
 
     private static final BigDecimal HIGH_VALUE_THRESHOLD = new BigDecimal("1000000");
     private static final String DIRECTOR_ROLE_NAME = "Director";
@@ -27,48 +29,57 @@ public class ApprovalServiceImpl implements ApprovalService {
                                UserRepository userRepository,
                                ApprovalRepository approvalRepository,
                                ExchangeRateRepository exchangeRateRepository,
-                               ApprovalStepRepository approvalStepRepository) { // <-- ADD TO CONSTRUCTOR
+                               ApprovalStepRepository approvalStepRepository,
+                               BudgetCodeRepository budgetCodeRepository) {
         this.purchaseRequestRepository = purchaseRequestRepository;
         this.userRepository = userRepository;
         this.approvalRepository = approvalRepository;
         this.exchangeRateRepository = exchangeRateRepository;
-        this.approvalStepRepository = approvalStepRepository; // <-- INITIALIZE
+        this.approvalStepRepository = approvalStepRepository;
+        this.budgetCodeRepository = budgetCodeRepository;
     }
 
     @Override
     @Transactional
     public void processDecision(int requestId, String userEmail, String decision, String reason) {
-        // 1. Fetch entities
-        User approver = userRepository.findByEmail(userEmail).orElseThrow(() -> new UsernameNotFoundException("User not found: " + userEmail));
-        PurchaseRequest request = purchaseRequestRepository.findById(requestId).orElseThrow(() -> new RuntimeException("Purchase Request not found: " + requestId));
+        User approver = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userEmail));
+        PurchaseRequest request = purchaseRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Purchase Request not found: " + requestId));
 
-        // 2. Self-Approval Check
         boolean isSelfApproval = approver.getUserId().equals(request.getCreatedByUser().getUserId());
         boolean isDirector = approver.getRoles().stream().anyMatch(role -> DIRECTOR_ROLE_NAME.equals(role.getRoleName()));
         if (isSelfApproval && !isDirector) {
             throw new AccessDeniedException("You cannot approve your own request.");
         }
 
-        // 3. Process Rejection
         if ("reject".equalsIgnoreCase(decision)) {
             processRejection(request, approver, reason);
             return;
         }
 
-        // 4. Process Approval based on the current level
         switch (request.getCurrentApprovalLevel()) {
-            case 1:
-                processDepartmentManagerApproval(request, approver);
-                break;
-            case 2:
-                processProcurementManagerApproval(request, approver);
-                break;
-            case 3:
-                processDirectorApproval(request, approver);
-                break;
-            default:
-                throw new IllegalStateException("Request is at an invalid approval level: " + request.getCurrentApprovalLevel());
+            case 1 -> processDepartmentManagerApproval(request, approver);
+            case 2 -> processProcurementManagerApproval(request, approver);
+            case 3 -> processDirectorApproval(request, approver);
+            default -> throw new IllegalStateException("Request is at an invalid approval level: " + request.getCurrentApprovalLevel());
         }
+    }
+
+    @Override
+    @Transactional
+    public void returnForEdit(int requestId, String userEmail, String comments) {
+        User approver = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userEmail));
+        PurchaseRequest request = purchaseRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Purchase Request not found: " + requestId));
+
+        logApprovalAction(request, approver, "Returned for Edit", comments);
+
+        request.setStatus("Returned for Edit");
+        request.setRejectReason(comments);
+
+        purchaseRequestRepository.save(request);
     }
 
     private void processDepartmentManagerApproval(PurchaseRequest request, User approver) {
@@ -76,8 +87,9 @@ public class ApprovalServiceImpl implements ApprovalService {
         if (departmentManagerId == null || !departmentManagerId.equals(approver.getUserId())) {
             throw new AccessDeniedException("You are not the designated manager for this department.");
         }
+        logApprovalAction(request, approver, "Approved", null);
         request.setCurrentApprovalLevel(2);
-        logApproval(request, approver, "Approved", null);
+        purchaseRequestRepository.save(request);
     }
 
     private void processProcurementManagerApproval(PurchaseRequest request, User approver) {
@@ -85,13 +97,15 @@ public class ApprovalServiceImpl implements ApprovalService {
         if (!isProcurementManager) {
             throw new AccessDeniedException("User does not have the Procurement Manager role.");
         }
+        logApprovalAction(request, approver, "Approved", null);
         BigDecimal valueInTRY = calculateRequestValueInTRY(request);
         if (valueInTRY.compareTo(HIGH_VALUE_THRESHOLD) > 0) {
             request.setCurrentApprovalLevel(3);
         } else {
+            consumeBudgetForRequest(request);
             request.setStatus("Approved");
         }
-        logApproval(request, approver, "Approved", null);
+        purchaseRequestRepository.save(request);
     }
 
     private void processDirectorApproval(PurchaseRequest request, User approver) {
@@ -99,38 +113,58 @@ public class ApprovalServiceImpl implements ApprovalService {
         if (!isDirector) {
             throw new AccessDeniedException("User does not have the Director role.");
         }
+        logApprovalAction(request, approver, "Approved", null);
+        consumeBudgetForRequest(request);
         request.setStatus("Approved");
-        logApproval(request, approver, "Approved", null);
+        purchaseRequestRepository.save(request);
     }
 
     private void processRejection(PurchaseRequest request, User approver, String reason) {
+        logApprovalAction(request, approver, "Rejected", reason);
         request.setStatus("Rejected");
         request.setRejectReason(reason);
-        logApproval(request, approver, "Rejected", reason);
+        purchaseRequestRepository.save(request);
     }
 
-    // *** FIX FOR BUG #1: CORRECTED LOGGING METHOD ***
-    private void logApproval(PurchaseRequest request, User approver, String status, String reason) {
-        // Find the ApprovalStep that corresponds to the request's CURRENT level before it changes
+    private void consumeBudgetForRequest(PurchaseRequest request) {
+        BudgetCode budgetCode = request.getBudgetCode();
+        BigDecimal requestAmountInTRY = calculateRequestValueInTRY(request);
+
+        if (budgetCode.getBudgetAmount().compareTo(requestAmountInTRY) < 0) {
+            throw new InsufficientBudgetException(
+                    String.format("Approval failed: Insufficient funds in budget code '%s'. Remaining: %.2f, Required: %.2f",
+                            budgetCode.getCode(),
+                            budgetCode.getBudgetAmount(),
+                            requestAmountInTRY)
+            );
+        }
+
+        BigDecimal newBudgetAmount = budgetCode.getBudgetAmount().subtract(requestAmountInTRY);
+        budgetCode.setBudgetAmount(newBudgetAmount);
+        budgetCodeRepository.save(budgetCode);
+    }
+
+    private void logApprovalAction(PurchaseRequest request, User approver, String status, String reason) {
         ApprovalStep currentStep = approvalStepRepository.findByStepOrder(request.getCurrentApprovalLevel())
                 .orElseThrow(() -> new IllegalStateException("Cannot log approval for a non-existent approval step level: " + request.getCurrentApprovalLevel()));
 
         Approval approvalLog = new Approval();
         approvalLog.setPurchaseRequest(request);
-        approvalLog.setApprovalStep(currentStep); // <-- SET THE APPROVAL STEP
+        approvalLog.setApprovalStep(currentStep);
         approvalLog.setApproverUser(approver);
         approvalLog.setApprovalStatus(status);
         approvalLog.setRejectReason(reason);
         approvalLog.setApprovalDate(LocalDateTime.now());
         approvalRepository.save(approvalLog);
     }
-    // ***********************************************
 
     private BigDecimal calculateRequestValueInTRY(PurchaseRequest request) {
-        if ("TRY".equalsIgnoreCase(request.getCurrency().getCurrencyCode())) return request.getNetAmount();
+        if ("TRY".equalsIgnoreCase(request.getCurrency().getCurrencyCode())) {
+            return request.getNetAmount();
+        }
         ExchangeRate exchangeRate = exchangeRateRepository
                 .findTopByCurrencyIdAndDateLessThanEqualOrderByDateDesc(request.getCurrency().getCurrencyId(), request.getCreatedAt().toLocalDate())
-                .orElseThrow(() -> new RuntimeException("Exchange rate not found for currency."));
+                .orElseThrow(() -> new IllegalStateException("Exchange rate not found for currency code: " + request.getCurrency().getCurrencyCode()));
         return request.getNetAmount().multiply(exchangeRate.getRate());
     }
 }

@@ -24,7 +24,7 @@ public class Approval {
     private PurchaseRequest purchaseRequest;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ApprovalStepID", nullable = false)
+    @JoinColumn(name = "ApprovalStepID", nullable = true) // Changed from nullable=false
     private ApprovalStep approvalStep;
 
     @ManyToOne(fetch = FetchType.LAZY)

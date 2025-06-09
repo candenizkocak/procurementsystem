@@ -5,7 +5,29 @@ body {
     padding: 0;
     height: 100vh;
     overflow: hidden; /* Prevents scrollbars on the main page */
+    background-color: #f4f7f6; /* A light background for the content area */
 }
+
+/* POLAT HOLDING Corporate Colors */
+:root {
+    --polat-teal: #003E51;
+    --polat-white: #FFFFFF;
+    --polat-light-gray: #f4f7f6;
+    --polat-medium-gray: #e9ecef;
+    --polat-dark-gray: #495057;
+    --polat-accent-blue: #0056b3; /* Kept for some UI elements like focused borders */
+
+    --status-approved-bg: #d4edda;
+    --status-approved-text: #155724;
+    --status-rejected-bg: #f8d7da;
+    --status-rejected-text: #721c24;
+    --status-pending-bg: #fff0c1;
+    --status-pending-text: #8a6d3b;
+    /* FIX: Changed to an orange/yellow warning color */
+    --status-returned-bg: #fff3cd;
+    --status-returned-text: #856404;
+}
+
 
 /* Main container using CSS Grid for the two-panel layout */
 .login-page-container {
@@ -16,15 +38,14 @@ body {
 
 /* --- Left Image Panel --- */
 .image-panel {
-    /* This sets the background image you provided */
     background-image: url('../images/login-background.jpg');
-    background-size: cover; /* Ensures the image covers the entire panel */
-    background-position: center; /* Centers the image */
+    background-size: cover;
+    background-position: center;
 }
 
 /* --- Right Login Panel --- */
 .login-panel {
-    background-color: #ffffff; /* A clean white background for the form */
+    background-color: var(--polat-white);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -40,7 +61,7 @@ body {
 .form-logo {
     display: block;
     max-width: 180px;
-    margin: 0 auto 40px auto; /* Centers the logo and adds space below */
+    margin: 0 auto 40px auto;
 }
 
 .login-form-container h2 {
@@ -78,7 +99,7 @@ body {
 }
 
 .input-group input:focus {
-    border-bottom-color: #0056b3;
+    border-bottom-color: var(--polat-accent-blue);
 }
 
 .input-group label {
@@ -95,7 +116,7 @@ body {
 .input-group input:valid ~ label {
     top: -15px;
     font-size: 12px;
-    color: #0056b3;
+    color: var(--polat-accent-blue);
 }
 
 .form-options {
@@ -117,7 +138,7 @@ body {
 }
 
 .form-options a {
-    color: #0056b3;
+    color: var(--polat-accent-blue);
     text-decoration: none;
 }
 
@@ -129,8 +150,8 @@ body {
     width: 100%;
     padding: 12px;
     border: none;
-    background: #003E51; /* Using the specified corporate color for the button */
-    color: white;
+    background: var(--polat-teal); /* Corporate Color */
+    color: var(--polat-white);
     font-size: 18px;
     font-weight: 600;
     border-radius: 5px;
@@ -152,63 +173,44 @@ body {
 }
 
 .alert-danger {
-    color: #721c24;
-    background-color: #f8d7da;
+    color: var(--status-rejected-text);
+    background-color: var(--status-rejected-bg);
     border-color: #f5c6cb;
 }
 
 .alert-success {
-    color: #155724;
-    background-color: #d4edda;
+    color: var(--status-approved-text);
+    background-color: var(--status-approved-bg);
     border-color: #c3e6cb;
 }
 
 /* --- Responsive Design for Mobile --- */
 @media (max-width: 800px) {
     .login-page-container {
-        grid-template-columns: 1fr; /* Stack columns on top of each other */
+        grid-template-columns: 1fr;
     }
 
     .image-panel {
-        /* Hide the large image on mobile to save space and data */
         display: none;
     }
 
     .login-panel {
-        background-color: #f8f9fa; /* Use a light grey background on mobile */
+        background-color: var(--polat-light-gray);
     }
 }
 
-/* Dashboard placeholder styles from before */
-.dashboard-container {
-    text-align: center;
-    padding: 50px;
-}
-.btn-logout {
-    padding: 10px 20px;
-    border: none;
-    background-color: #d9534f;
-    color: white;
-    font-size: 14px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-.btn-logout:hover {
-    background-color: #c9302c;
-}
 
+/* --- Application Layout --- */
 .app-container {
     display: flex;
     height: 100vh;
-    background-color: #f4f7f6; /* A light background for the content area */
 }
 
 /* Sidebar Styling */
 .sidebar {
     width: 260px;
-    background-color: #003E51; /* Corporate blue */
-    color: #ffffff;
+    background-color: var(--polat-teal); /* Corporate Color */
+    color: var(--polat-white);
     display: flex;
     flex-direction: column;
     padding: 20px 0;
@@ -222,14 +224,10 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.sidebar-logo {
-    max-width: 40px;
-    margin-right: 15px;
-}
-
-.sidebar-title {
-    font-size: 1.2rem;
-    font-weight: 600;
+.sidebar-main-logo {
+    max-width: 160px;
+    margin: 10px auto;
+    display: block;
 }
 
 .nav-menu {
@@ -251,12 +249,12 @@ body {
 
 .nav-item a:hover {
     background-color: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    color: var(--polat-white);
 }
 
 .nav-item.active a {
-    background-color: #0056b3;
-    color: #ffffff;
+    background-color: var(--polat-accent-blue); /* Active link highlight */
+    color: var(--polat-white);
     font-weight: 600;
 }
 
@@ -274,8 +272,8 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 20px 30px;
-    background-color: #ffffff;
-    border-bottom: 1px solid #e0e0e0;
+    background-color: var(--polat-white);
+    border-bottom: 1px solid var(--polat-medium-gray);
     height: 80px;
     box-sizing: border-box;
 }
@@ -295,6 +293,20 @@ body {
     font-weight: 500;
 }
 
+.btn-logout {
+    padding: 8px 16px;
+    border: none;
+    background-color: #6c757d;
+    color: white;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.btn-logout:hover {
+    background-color: var(--polat-dark-gray);
+}
+
 /* Page content where the table will live */
 .page-content {
     flex-grow: 1;
@@ -308,14 +320,14 @@ body {
     border-collapse: collapse;
     font-size: 0.95rem;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
-    background-color: #ffffff;
+    background-color: var(--polat-white);
     border-radius: 8px;
-    overflow: hidden; /* Important for border-radius on table */
+    overflow: hidden;
 }
 
 .content-table thead tr {
-    background-color: #003E51;
-    color: #ffffff;
+    background-color: var(--polat-teal);
+    color: var(--polat-white);
     text-align: left;
     font-weight: 600;
 }
@@ -334,10 +346,10 @@ body {
 }
 
 .content-table tbody tr:last-of-type {
-    border-bottom: 2px solid #003E51;
+    border-bottom: 2px solid var(--polat-teal);
 }
 
-.content-table tbody tr:hover {
+.content-table tbody tr.clickable-row:hover {
     background-color: #f1f1f1;
     cursor: pointer;
 }
@@ -353,27 +365,40 @@ body {
 }
 
 .status-pending {
-    background-color: #fff0c1;
-    color: #8a6d3b;
+    background-color: var(--status-pending-bg);
+    color: var(--status-pending-text);
 }
 
 .status-approved {
-    background-color: #d4edda;
-    color: #155724;
+    background-color: var(--status-approved-bg);
+    color: var(--status-approved-text);
 }
 
 .status-rejected {
-    background-color: #f8d7da;
-    color: #721c24;
+    background-color: var(--status-rejected-bg);
+    color: var(--status-rejected-text);
 }
 
-.sidebar-main-logo {
-    max-width: 160px; /* Adjust size as needed */
-    margin: 10px auto; /* Center the logo */
-    display: block;
+.status-returned-for-edit {
+    background-color: var(--status-returned-bg);
+    color: var(--status-returned-text);
 }
+
+
+.rejection-row {
+    background-color: var(--status-rejected-bg) !important;
+    font-size: 0.9em;
+}
+.rejection-row td {
+    padding-top: 5px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e6c8cb;
+    color: var(--status-rejected-text);
+}
+
+/* Form Container Styles */
 .form-container {
-    background-color: #ffffff;
+    background-color: var(--polat-white);
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
@@ -382,7 +407,7 @@ body {
 .form-section {
     margin-bottom: 25px;
     padding-bottom: 25px;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid var(--polat-medium-gray);
 }
 .form-section:last-of-type {
     border-bottom: none;
@@ -401,7 +426,7 @@ body {
 
 .form-group label {
     font-weight: 600;
-    color: #495057;
+    color: var(--polat-dark-gray);
     margin-bottom: 8px;
 }
 
@@ -412,7 +437,7 @@ body {
     border: 1px solid #ced4da;
     border-radius: 4px;
     font-size: 1rem;
-    box-sizing: border-box; /* Important for padding */
+    box-sizing: border-box;
 }
 
 /* Item Table Styles */
@@ -424,7 +449,7 @@ body {
 .item-table th, .item-table td {
     padding: 8px;
     text-align: left;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--polat-medium-gray);
 }
 .item-table th {
     background-color: #f8f9fa;
@@ -454,7 +479,7 @@ body {
     transition: background-color 0.2s;
 }
 .btn-primary {
-    background-color: #0056b3;
+    background-color: var(--polat-accent-blue);
     color: white;
 }
 .btn-primary:hover {
@@ -474,6 +499,14 @@ body {
 .btn-danger:hover {
     background-color: #c82333;
 }
+.btn-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+.btn-warning:hover {
+    background-color: #e0a800;
+}
+
 .btn-sm {
     padding: 5px 10px;
     font-size: 0.8rem;
@@ -492,13 +525,13 @@ body {
     text-align: center;
 }
 .alert-success-flash {
-    background-color: #d4edda;
-    color: #155724;
+    background-color: var(--status-approved-bg);
+    color: var(--status-approved-text);
     border: 1px solid #c3e6cb;
 }
 .alert-danger-flash {
-    background-color: #f8d7da;
-    color: #721c24;
+    background-color: var(--status-rejected-bg);
+    color: var(--status-rejected-text);
     border: 1px solid #f5c6cb;
 }
 .actions-container {
@@ -506,9 +539,9 @@ body {
     gap: 8px; /* Space between buttons */
 }
 
-/* Modal styles for the rejection reason */
+/* Modal styles */
 .modal {
-    display: none; /* Hidden by default */
+    display: none;
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -516,7 +549,7 @@ body {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0,0,0,0.5); /* Black with opacity */
+    background-color: rgba(0,0,0,0.5);
 }
 
 .modal-content {
@@ -572,16 +605,4 @@ body {
 .modal-footer {
     text-align: right;
     margin-top: 20px;
-}
-.clickable-row {
-    cursor: pointer;
-}
-.rejection-row {
-    background-color: #f8d7da !important;
-    font-size: 0.9em;
-}
-.rejection-row td {
-    padding-top: 5px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #e6c8cb;
 }

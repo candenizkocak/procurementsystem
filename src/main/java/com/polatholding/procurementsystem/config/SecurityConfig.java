@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,6 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
@@ -25,7 +27,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/error").permitAll()
+                        .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/error", "/error/403").permitAll() // Permit access to the error pages
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -34,19 +36,24 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/dashboard", true)
                         .permitAll()
                 )
-                .rememberMe(rememberMe -> rememberMe.key("aSecretKeyToRememberUsers")) // <-- ADD THIS
+                .rememberMe(rememberMe -> rememberMe.key("aSecretKeyToRememberUsers"))
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()
+                )
+                // --- THIS IS THE FIX ---
+                // Add custom exception handling for access denied errors.
+                .exceptionHandling(exceptions -> exceptions
+                        .accessDeniedPage("/error/403") // Redirect to our custom controller endpoint
                 );
+        // ---------------------
 
         return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // Use BCrypt for strong, salted password hashing
         return new BCryptPasswordEncoder();
     }
 

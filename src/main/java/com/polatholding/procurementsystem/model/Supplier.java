@@ -20,5 +20,18 @@ public class Supplier {
     @Column(name = "SupplierName", nullable = false, length = 100)
     private String supplierName;
 
-    // Other fields are kept simple for now
+    @Column(name = "ContactPerson", length = 100)
+    private String contactPerson;
+
+    @Column(name = "Email", length = 100)
+    private String email;
+
+    @Column(name = "Phone", length = 30)
+    private String phone;
+
+    @Column(name = "Address", length = 200)
+    private String address;
+
+    @Column(name = "Status", nullable = false, length = 20)
+    private String status;
 }

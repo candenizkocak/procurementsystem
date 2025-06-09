@@ -1,0 +1,18 @@
+package com.polatholding.procurementsystem.service;
+
+import com.polatholding.procurementsystem.dto.SupplierDto;
+import com.polatholding.procurementsystem.dto.SupplierFormDto;
+import java.util.List;
+
+public interface SupplierService {
+
+    List<SupplierDto> getAllSuppliers();
+
+    List<SupplierDto> getPendingSuppliers();
+
+    void createNewSupplier(SupplierFormDto supplierFormDto);
+
+    void approveSupplier(Integer supplierId);
+
+    void rejectSupplier(Integer supplierId);
+}

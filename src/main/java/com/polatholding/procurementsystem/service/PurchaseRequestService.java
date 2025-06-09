@@ -9,16 +9,20 @@ import java.util.List;
 
 public interface PurchaseRequestService {
 
-    // The primary method for displaying requests on the dashboard.
     List<PurchaseRequestDto> getRequestsForUser(String userEmail);
 
-    NewRequestFormInitDto getNewRequestFormData();
+    NewRequestFormInitDto getNewRequestFormData(String userEmail);
 
     void saveNewRequest(PurchaseRequestFormDto formDto, String userEmail);
 
+    PurchaseRequestFormDto getRequestFormById(Integer requestId);
+
+    void updateRequest(Integer requestId, PurchaseRequestFormDto formDto, String userEmail);
+
+    String getUserFullName(String userEmail);
+
     List<PurchaseRequestDto> getPendingApprovalsForUser(String userEmail);
 
-    // This method is now effectively unused but required by the interface contract.
     List<PurchaseRequestDto> getAllRequests();
 
     PurchaseRequestDetailDto getRequestDetailsById(Integer requestId);

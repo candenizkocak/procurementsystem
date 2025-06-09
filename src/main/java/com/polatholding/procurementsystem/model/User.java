@@ -33,9 +33,6 @@ public class User {
     @Column(name = "PasswordHash", nullable = false, length = 256)
     private String passwordHash;
 
-    @Column(name = "IsActive", nullable = false)
-    private boolean isActive;
-
     @Column(name = "CreatedAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
