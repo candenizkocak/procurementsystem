@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/reports")
-@PreAuthorize("hasAnyRole('Finance', 'ProcurementManager')")
+@PreAuthorize("hasAnyRole('Finance Officer', 'ProcurementManager')")
 public class ReportController {
 
     private final ReportService reportService;

@@ -31,7 +31,8 @@
         <!-- Page Content -->
         <div class="page-content">
             <div style="margin-bottom: 20px; text-align: right;">
-                <a th:href="@{/suppliers/new}" class="btn btn-primary">Add New Supplier</a>
+                <a th:href="@{/suppliers/new}" class="btn btn-primary"
+                   sec:authorize="@securityHelper.isProcurementStaff(authentication)">Add New Supplier</a>
             </div>
 
             <div th:if="${successMessage}" class="alert-flash alert-success-flash" th:text="${successMessage}"></div>
