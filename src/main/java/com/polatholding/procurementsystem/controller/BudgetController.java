@@ -12,7 +12,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/budgets")
-@PreAuthorize("hasRole('Finance')")
+@PreAuthorize("hasRole('Finance Officer')")
 public class BudgetController {
 
     private final BudgetService budgetService;
