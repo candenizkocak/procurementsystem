@@ -18,9 +18,7 @@
             <h1 th:text="${isEditMode} ? 'Edit Purchase Request #' + ${requestId} : 'Create New Purchase Request'"></h1>
             <div class="user-profile">
                 <span sec:authentication="principal.username">user@example.com</span>
-                <form th:action="@{/logout}" method="post">
-                    <button type="submit" class="btn-logout">Logout</button>
-                </form>
+                <form th:action="@{/logout}" method="post"><button type="submit" class="btn-logout">Logout</button></form>
             </div>
         </header>
 
@@ -30,13 +28,8 @@
                 <div th:if="${successMessage}" class="alert-flash alert-success-flash" th:text="${successMessage}"></div>
                 <div th:if="${errorMessage}" class="alert-flash alert-danger-flash" th:text="${errorMessage}"></div>
 
-                <!--
-                  FIX: Use th:with to determine the action URL first, removing ambiguity for the parser.
-                -->
                 <div th:with="actionUrl=${isEditMode} ? @{/requests/{id}/update(id=${requestId})} : @{/requests/save}">
                     <form th:action="${actionUrl}" th:object="${requestForm}" method="post">
-
-                        <!-- Section 1: General Request Information -->
                         <div class="form-section">
                             <h3>General Information</h3>
                             <div class="form-grid">
@@ -61,7 +54,6 @@
                             </div>
                         </div>
 
-                        <!-- Section 2: Items -->
                         <div class="form-section">
                             <h3>Request Items</h3>
                             <table class="item-table" id="item-table">
@@ -105,7 +97,6 @@
                             </div>
                         </div>
 
-                        <!-- Form Actions -->
                         <div class="form-actions">
                             <button type="submit" class="btn btn-primary"
                                     th:text="${isEditMode} ? 'Update and Resubmit' : 'Submit Request'">
@@ -113,23 +104,18 @@
                         </div>
                     </form>
                 </div>
-
             </div>
         </div>
     </main>
 </div>
 
-<!-- JavaScript for dynamic rows (unchanged) -->
 <script th:inline="javascript">
     const suppliers = /*[[${formData.suppliers}]]*/ [];
     const units = /*[[${formData.units}]]*/ [];
-
     let supplierOptions = '<option value="">Select...</option>';
     suppliers.forEach(sup => { supplierOptions += `<option value="${sup.supplierId}">${sup.supplierName}</option>`; });
-
     let unitOptions = '<option value="">Select...</option>';
     units.forEach(unit => { unitOptions += `<option value="${unit.unitId}">${unit.unitName}</option>`; });
-
     function addRow() {
         const tableBody = document.getElementById('item-table').getElementsByTagName('tbody')[0];
         const newIndex = tableBody.rows.length;
@@ -144,7 +130,6 @@
             <td class="actions-cell"><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">Remove</button></td>
         `;
     }
-
     function removeRow(button) {
         const tableBody = document.getElementById('item-table').getElementsByTagName('tbody')[0];
         if (tableBody.rows.length <= 1) {
@@ -155,7 +140,6 @@
         row.parentNode.removeChild(row);
         updateRowIndexes();
     }
-
     function updateRowIndexes() {
         const tableBody = document.getElementById('item-table').getElementsByTagName('tbody')[0];
         for (let i = 0; i < tableBody.rows.length; i++) {

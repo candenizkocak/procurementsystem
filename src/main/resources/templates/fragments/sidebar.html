@@ -17,15 +17,19 @@
         <li class="nav-item" th:classappend="${#strings.startsWith(currentUrl, '/approvals')} ? 'active' : ''">
             <a th:href="@{/approvals}">Approvals</a>
         </li>
-        <li class="nav-item" th:classappend="${#strings.startsWith(currentUrl, '/suppliers')} ? 'active' : ''">
+        <li class="nav-item" th:classappend="${#strings.startsWith(currentUrl, '/suppliers')} ? 'active' : ''"
+            sec:authorize="hasAnyRole('ProcurementManager', 'Employee')">
             <a th:href="@{/suppliers}">Suppliers</a>
         </li>
-        <!-- NEW BUDGETS LINK (Visible only to Finance role) -->
         <li class="nav-item" th:classappend="${#strings.startsWith(currentUrl, '/budgets')} ? 'active' : ''"
             sec:authorize="hasRole('Finance')">
             <a th:href="@{/budgets}">Budgets</a>
         </li>
-        <li class="nav-item"><a href="#">Reports</a></li>
+        <!-- UPDATED REPORTS LINK -->
+        <li class="nav-item" th:classappend="${#strings.startsWith(currentUrl, '/reports')} ? 'active' : ''"
+            sec:authorize="hasAnyRole('Finance', 'ProcurementManager')">
+            <a th:href="@{/reports/budget-status}">Reports</a>
+        </li>
         <li class="nav-item"><a href="#">Admin</a></li>
     </ul>
 </aside>

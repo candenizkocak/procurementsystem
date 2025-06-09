@@ -74,4 +74,12 @@ public class SupplierServiceImpl implements SupplierService {
         BeanUtils.copyProperties(supplier, dto);
         return dto;
     }
+    @Override
+    @Transactional(readOnly = true)
+    public List<SupplierDto> searchSuppliers(String searchTerm) {
+        return supplierRepository.searchByFreetext(searchTerm)
+                .stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
 }

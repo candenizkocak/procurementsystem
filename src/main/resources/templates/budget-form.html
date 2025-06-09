@@ -25,11 +25,7 @@
         <!-- Page Content -->
         <div class="page-content">
             <div class="form-container">
-                <!--
-                  THE DEFINITIVE FIX: Use Thymeleaf's preprocessing __${...}__ syntax to evaluate
-                  the variable inside the URL string context.
-                -->
-                <div th:with="actionUrl=${isEditMode} ? @{/budgets/{id}/update(id=__${budgetFormDto.budgetCodeId}__)} : @{/budgets/save}">
+                <div th:with="actionUrl=${isEditMode} ? @{/budgets/{id}/update(id=${budgetFormDto.budgetCodeId})} : @{/budgets/save}">
                     <form th:action="${actionUrl}" th:object="${budgetFormDto}" method="post">
                         <div class="form-section">
                             <h3>Budget Details</h3>

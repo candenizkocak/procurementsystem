@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -54,4 +55,15 @@ public interface PurchaseRequestRepository extends JpaRepository<PurchaseRequest
             "LEFT JOIN FETCH i.unit " +
             "WHERE pr.requestId = :requestId")
     Optional<PurchaseRequest> findByIdWithAllDetails(@Param("requestId") Integer requestId);
+
+    @Query("SELECT COALESCE(SUM(pr.netAmount), 0) FROM PurchaseRequest pr WHERE pr.budgetCode.id = :budgetCodeId AND pr.status = 'Approved'")
+    BigDecimal getConsumedAmountForBudget(@Param("budgetCodeId") Integer budgetCodeId);
+
+    @Query(value = "SELECT pr.* FROM PurchaseRequests pr " +
+            "JOIN PurchaseRequestItems pri ON pr.RequestID = pri.RequestID " +
+            "WHERE FREETEXT((pri.ItemName, pri.Description), :searchTerm)",
+            nativeQuery = true)
+    List<PurchaseRequest> searchByItemFreetext(@Param("searchTerm") String searchTerm);
+
+
 }

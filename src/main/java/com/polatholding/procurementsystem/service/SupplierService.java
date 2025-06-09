@@ -15,4 +15,6 @@ public interface SupplierService {
     void approveSupplier(Integer supplierId);
 
     void rejectSupplier(Integer supplierId);
+
+    List<SupplierDto> searchSuppliers(String searchTerm);
 }

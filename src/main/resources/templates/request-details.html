@@ -35,11 +35,11 @@
                         <div><strong>Budget Code:</strong> <span th:text="${request.budgetCode}"></span></div>
                         <div><strong>Status:</strong>
                             <span class="status-badge"
-                                  th:classappend="${#strings.toLowerCase(request.status) == 'pending' ? 'status-pending' : (#strings.toLowerCase(request.status) == 'approved' ? 'status-approved' : 'status-rejected')}"
+                                  th:classappend="${#strings.toLowerCase(request.status).replace(' ', '-')} == 'pending' ? 'status-pending' : (${#strings.toLowerCase(request.status).replace(' ', '-')} == 'approved' ? 'status-approved' : (${#strings.toLowerCase(request.status).replace(' ', '-')} == 'rejected' ? 'status-rejected' : 'status-returned-for-edit'))"
                                   th:text="${request.status}">
                             </span>
                         </div>
-                        <div th:if="${request.rejectReason}"><strong>Rejection Reason:</strong> <span style="color: #721c24;" th:text="${request.rejectReason}"></span></div>
+                        <div th:if="${request.rejectReason}"><strong>Reason:</strong> <span style="color: #721c24;" th:text="${request.rejectReason}"></span></div>
                     </div>
                 </div>
 
@@ -81,7 +81,7 @@
                     </table>
                 </div>
                 <div class="form-actions">
-                    <a th:href="@{/dashboard}" class="btn btn-secondary">Back to Dashboard</a>
+                    <a th:href="@{/dashboard}" class="btn btn-secondary" style="background-color: #6c757d; color: white;">Back to Dashboard</a>
                 </div>
             </div>
         </div>

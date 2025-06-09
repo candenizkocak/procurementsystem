@@ -13,9 +13,15 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <!-- Header -->
+        <!-- Header with context-sensitive search for Suppliers -->
         <header class="header">
             <h1>Supplier Management</h1>
+            <div class="search-container">
+                <form th:action="@{/suppliers}" method="get" class="search-form">
+                    <input type="search" name="q" placeholder="Search suppliers by name, contact, or address..." class="search-input" th:value="${searchTerm}" required>
+                    <button type="submit" class="search-button">Search</button>
+                </form>
+            </div>
             <div class="user-profile">
                 <span sec:authentication="principal.username">user@example.com</span>
                 <form th:action="@{/logout}" method="post"><button type="submit" class="btn-logout">Logout</button></form>
@@ -24,12 +30,10 @@
 
         <!-- Page Content -->
         <div class="page-content">
-            <!-- Action Button to create a new supplier -->
             <div style="margin-bottom: 20px; text-align: right;">
                 <a th:href="@{/suppliers/new}" class="btn btn-primary">Add New Supplier</a>
             </div>
 
-            <!-- Flash Messages -->
             <div th:if="${successMessage}" class="alert-flash alert-success-flash" th:text="${successMessage}"></div>
             <div th:if="${errorMessage}" class="alert-flash alert-danger-flash" th:text="${errorMessage}"></div>
 
@@ -46,7 +50,10 @@
                 </thead>
                 <tbody>
                 <tr th:if="${suppliers.isEmpty()}">
-                    <td colspan="6" style="text-align: center;">No suppliers found.</td>
+                    <td colspan="6" style="text-align: center;">
+                        <span th:if="${searchTerm}">No suppliers found for "[[${searchTerm}]]".</span>
+                        <span th:unless="${searchTerm}">No suppliers found.</span>
+                    </td>
                 </tr>
                 <tr th:each="supplier : ${suppliers}">
                     <td th:text="${supplier.supplierName}"></td>
@@ -54,15 +61,12 @@
                     <td th:text="${supplier.email}"></td>
                     <td th:text="${supplier.phone}"></td>
                     <td>
-                        <!--
-                           THE FIX: Removed the extra parentheses around the nested ternary operator.
-                        -->
-<span class="status-badge"
-      th:classappend="${#strings.toLowerCase(supplier.status) == 'pending' ? 'status-pending' : (#strings.toLowerCase(supplier.status) == 'active' ? 'status-approved' : 'status-rejected')}"
-      th:text="${supplier.status}">
-</span>
+                        <span class="status-badge"
+                              th:classappend="${#strings.toLowerCase(supplier.status) == 'pending' ? 'status-pending' :
+                                             (#strings.toLowerCase(supplier.status) == 'active' ? 'status-approved' : 'status-rejected')}"
+                              th:text="${supplier.status}">
+                        </span>
                     </td>
-                    <!-- Approval/Rejection actions visible only to ProcurementManager -->
                     <td sec:authorize="hasRole('ProcurementManager')">
                         <div class="actions-container" th:if="${#strings.equals(supplier.status, 'Pending')}">
                             <form th:action="@{/suppliers/approve/{id}(id=${supplier.supplierId})}" method="post" style="display: inline;">

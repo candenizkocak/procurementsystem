@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Budget Status Report</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body style="overflow-y: hidden">
+
+<div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" th:replace="~{fragments/sidebar :: sidebar}"></aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <h1>Budget Status Report</h1>
+            <div class="user-profile">
+                <span sec:authentication="principal.username">user@example.com</span>
+                <form th:action="@{/logout}" method="post"><button type="submit" class="btn-logout">Logout</button></form>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="page-content">
+            <table class="content-table">
+                <thead>
+                <tr>
+                    <th>Department</th>
+                    <th>Budget Code</th>
+                    <th>Year</th>
+                    <th>Initial Amount</th>
+                    <th>Consumed</th>
+                    <th>Remaining</th>
+                    <th style="width: 20%;">Consumption</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${reportData.isEmpty()}">
+                    <td colspan="7" style="text-align: center;">No budget data available to report.</td>
+                </tr>
+                <tr th:each="item : ${reportData}">
+                    <td th:text="${item.departmentName}"></td>
+                    <td th:text="${item.budgetCode}"></td>
+                    <td th:text="${item.year}"></td>
+                    <td th:text="${#numbers.formatDecimal(item.initialAmount, 1, 'COMMA', 2, 'POINT') + ' TRY'}"></td>
+                    <td th:text="${#numbers.formatDecimal(item.consumedAmount, 1, 'COMMA', 2, 'POINT') + ' TRY'}"></td>
+                    <td th:text="${#numbers.formatDecimal(item.remainingAmount, 1, 'COMMA', 2, 'POINT') + ' TRY'}"></td>
+                    <td>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar"
+                                 th:style="'width: ' + ${item.consumptionPercentage} + '%;'"
+                                 th:classappend="${item.consumptionPercentage > 90 ? 'progress-bar-danger' : (item.consumptionPercentage > 70 ? 'progress-bar-warning' : 'progress-bar-success')}">
+                            </div>
+                        </div>
+                        <span th:text="${#numbers.formatDecimal(item.consumptionPercentage, 1, 1) + '%'}"></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

@@ -8,23 +8,27 @@
 <body style="overflow-y: hidden">
 
 <div class="app-container">
-    <!-- Sidebar Navigation -->
+    <!-- Sidebar -->
     <aside class="sidebar" th:replace="~{fragments/sidebar :: sidebar}"></aside>
 
     <!-- Main Content -->
     <main class="main-content">
-        <!-- Header -->
+        <!-- Header with context-sensitive search for Dashboard -->
         <header class="header">
             <h1>Dashboard</h1>
+            <div class="search-container">
+                <form th:action="@{/dashboard}" method="get" class="search-form">
+                    <input type="search" name="q" placeholder="Search requests by item name or description..." class="search-input" th:value="${searchTerm}" required>
+                    <button type="submit" class="search-button">Search</button>
+                </form>
+            </div>
             <div class="user-profile">
                 <span sec:authentication="principal.username">user@example.com</span>
-                <form th:action="@{/logout}" method="post">
-                    <button type="submit" class="btn-logout">Logout</button>
-                </form>
+                <form th:action="@{/logout}" method="post"><button type="submit" class="btn-logout">Logout</button></form>
             </div>
         </header>
 
-        <!-- Page Content with Table -->
+        <!-- Page Content -->
         <div class="page-content">
             <div th:if="${successMessage}" class="alert-flash alert-success-flash" th:text="${successMessage}"></div>
             <div th:if="${errorMessage}" class="alert-flash alert-danger-flash" th:text="${errorMessage}"></div>
@@ -38,18 +42,21 @@
                     <th>Created At</th>
                     <th>Net Amount</th>
                     <th>Status</th>
-                    <th>Actions</th> <!-- NEW ACTIONS COLUMN -->
+                    <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:if="${requests.isEmpty()}">
-                    <td colspan="7" style="text-align: center;">No purchase requests found.</td>
+                    <td colspan="7" style="text-align: center;">
+                        <span th:if="${searchTerm}">No requests found for "[[${searchTerm}]]".</span>
+                        <span th:unless="${searchTerm}">No purchase requests found.</span>
+                    </td>
                 </tr>
                 <th:block th:each="request : ${requests}">
                     <tr class="clickable-row" th:attr="data-href=@{/requests/{id}(id=${request.requestId})}">
-                        <td th:text="${'#' + request.requestId}">#1001</td>
-                        <td th:text="${request.creatorFullName}">Ali Yılmaz</td>
-                        <td th:text="${request.departmentName}">IT</td>
+                        <td th:text="${'#' + request.requestId}"></td>
+                        <td th:text="${request.creatorFullName}"></td>
+                        <td th:text="${request.departmentName}"></td>
                         <td th:text="${#temporals.format(request.createdAt, 'dd-MMM-yyyy HH:mm')}"></td>
                         <td th:text="${#numbers.formatDecimal(request.netAmount, 1, 'COMMA', 2, 'POINT') + ' ' + request.currencyCode}"></td>
                         <td>
@@ -61,17 +68,15 @@
                                   th:text="${request.status}">
                             </span>
                         </td>
-                        <!-- NEW LOGIC FOR ACTION BUTTON -->
                         <td>
                             <a th:if="${#strings.equals(request.status, 'Returned for Edit') and #authentication.principal.userId == request.creatorId}"
                                th:href="@{/requests/{id}/edit(id=${request.requestId})}"
                                class="btn btn-warning btn-sm"
-                               onclick="event.stopPropagation();"> <!-- Stop row click -->
+                               onclick="event.stopPropagation();">
                                 Edit
                             </a>
                         </td>
                     </tr>
-                    <!-- Show rejection/return reason in a separate row -->
                     <tr th:if="${request.rejectReason != null and (#strings.equals(request.status, 'Rejected') or #strings.equals(request.status, 'Returned for Edit'))}"
                         class="rejection-row">
                         <td></td>

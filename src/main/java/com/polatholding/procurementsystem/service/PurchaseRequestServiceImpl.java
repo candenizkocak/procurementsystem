@@ -306,4 +306,25 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         dto.setItems(request.getItems());
         return dto;
     }
+    @Override
+    @Transactional(readOnly = true)
+    public List<PurchaseRequestDto> searchUserRequests(String userEmail, String searchTerm) {
+        // We get all requests found by the search term first.
+        List<PurchaseRequest> allFoundRequests = purchaseRequestRepository.searchByItemFreetext(searchTerm);
+
+        // Then, we filter them based on the user's permissions in Java.
+        User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new UsernameNotFoundException("User not found: " + userEmail));
+        boolean isPrivileged = user.getRoles().stream().anyMatch(role -> Set.of("Manager", "ProcurementManager", "Director", "Admin", "Finance", "Auditor").contains(role.getRoleName()));
+
+        if (isPrivileged) {
+            // Privileged users can see all search results.
+            return allFoundRequests.stream().map(this::convertToDto).collect(Collectors.toList());
+        } else {
+            // Standard users only see results they created.
+            return allFoundRequests.stream()
+                    .filter(req -> req.getCreatedByUser().getUserId().equals(user.getUserId()))
+                    .map(this::convertToDto)
+                    .collect(Collectors.toList());
+        }
+    }
 }

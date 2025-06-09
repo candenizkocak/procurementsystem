@@ -53,10 +53,6 @@
                             <!-- Phone -->
                             <div class="form-group">
                                 <label for="phone">Phone</label>
-                                <!--
-                                  THE FIX: Changed type to "text" and added a pattern for validation.
-                                  This provides better user experience than type="number" for phone fields.
-                                -->
                                 <input type="text" id="phone" th:field="*{phone}"
                                        pattern="[0-9\s\+\-\(\)]*"
                                        title="Please enter a valid phone number.">

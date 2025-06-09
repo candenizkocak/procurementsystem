@@ -5,6 +5,7 @@ import com.polatholding.procurementsystem.service.PurchaseRequestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
 import java.util.List;
@@ -24,13 +25,17 @@ public class AuthController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model, Principal principal) {
-        // This now calls a method on the INTERFACE, which is better practice.
-        // The implementation will handle the logic.
-        List<PurchaseRequestDto> requests = purchaseRequestService.getRequestsForUser(principal.getName());
-
+    public String dashboard(@RequestParam(name = "q", required = false) String query, Model model, Principal principal) {
+        List<PurchaseRequestDto> requests;
+        if (query != null && !query.trim().isEmpty()) {
+            // If there's a search query, use the search method
+            requests = purchaseRequestService.searchUserRequests(principal.getName(), query);
+            model.addAttribute("searchTerm", query);
+        } else {
+            // Otherwise, get requests normally
+            requests = purchaseRequestService.getRequestsForUser(principal.getName());
+        }
         model.addAttribute("requests", requests);
-
         return "dashboard";
     }
 

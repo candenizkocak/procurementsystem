@@ -606,3 +606,73 @@ body {
     text-align: right;
     margin-top: 20px;
 }
+.progress-bar-container {
+    background-color: var(--polat-medium-gray);
+    border-radius: 10px;
+    height: 15px;
+    width: 80%;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+}
+
+.progress-bar-success {
+    background-color: #28a745; /* Green */
+}
+
+.progress-bar-warning {
+    background-color: #ffc107; /* Yellow */
+}
+
+.progress-bar-danger {
+    background-color: #dc3545; /* Red */
+}
+.search-container {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px; /* Reduced padding to give more space */
+}
+
+.search-form {
+    display: flex;
+    width: 100%;
+    max-width: 600px; /* Made the search bar wider */
+}
+
+.search-input {
+    width: 100%;
+    border: 1px solid #ced4da;
+    border-right: none;
+    padding: 10px 15px;
+    font-size: 1rem;
+    border-radius: 5px 0 0 5px;
+    outline: none;
+}
+/* Style the placeholder text */
+.search-input::placeholder {
+    font-size: 0.9rem; /* Made the placeholder text smaller */
+    color: #999;
+}
+.search-input:focus {
+    border-color: var(--polat-accent-blue);
+    box-shadow: 0 0 0 2px rgba(0, 86, 179, 0.2);
+}
+
+.search-button {
+    padding: 10px 20px;
+    border: 1px solid var(--polat-accent-blue);
+    background-color: var(--polat-accent-blue);
+    color: white;
+    cursor: pointer;
+    border-radius: 0 5px 5px 0;
+    font-size: 1rem;
+}

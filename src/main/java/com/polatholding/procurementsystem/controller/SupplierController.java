@@ -15,8 +15,6 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/suppliers")
-// --- THIS IS THE FIX for the Security Flaw ---
-// Only users with the 'ProcurementManager' role can now access these endpoints.
 @PreAuthorize("hasRole('ProcurementManager')")
 public class SupplierController {
 
@@ -26,9 +24,21 @@ public class SupplierController {
         this.supplierService = supplierService;
     }
 
+    /**
+     * THE FIX: There is now only ONE method mapped to GET /suppliers.
+     * The @RequestParam(required = false) handles both cases:
+     * - When the URL is /suppliers, 'query' is null.
+     * - When the URL is /suppliers?q=search, 'query' has a value.
+     */
     @GetMapping
-    public String showSupplierList(Model model) {
-        List<SupplierDto> suppliers = supplierService.getAllSuppliers();
+    public String showSupplierList(@RequestParam(name = "q", required = false) String query, Model model) {
+        List<SupplierDto> suppliers;
+        if (query != null && !query.trim().isEmpty()) {
+            suppliers = supplierService.searchSuppliers(query);
+            model.addAttribute("searchTerm", query);
+        } else {
+            suppliers = supplierService.getAllSuppliers();
+        }
         model.addAttribute("suppliers", suppliers);
         return "suppliers";
     }

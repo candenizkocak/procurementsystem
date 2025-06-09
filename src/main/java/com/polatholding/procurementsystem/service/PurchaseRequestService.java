@@ -26,4 +26,6 @@ public interface PurchaseRequestService {
     List<PurchaseRequestDto> getAllRequests();
 
     PurchaseRequestDetailDto getRequestDetailsById(Integer requestId);
+
+    List<PurchaseRequestDto> searchUserRequests(String userEmail, String searchTerm);
 }
