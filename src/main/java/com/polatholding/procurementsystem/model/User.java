@@ -37,7 +37,7 @@ public class User {
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "DepartmentID", nullable = false)
+    @JoinColumn(name = "DepartmentID", nullable = true) // Now nullable
     private Department department;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -47,4 +47,7 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "RoleID")
     )
     private Set<Role> roles = new HashSet<>();
+
+    @Column(name = "FormerEmployee", nullable = false)
+    private boolean formerEmployee = false;
 }

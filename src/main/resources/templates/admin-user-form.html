@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${isEditMode} ? 'Edit User' : 'Create New User'"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .radio-group label, .checkbox-group label {
+            margin-right: 15px;
+            font-weight: normal;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+        .radio-group input[type="radio"] {
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        .form-group small.text-danger {
+            color: #dc3545;
+            display: block;
+            margin-top: .25rem;
+        }
+        .roles-container .form-group div.role-item-container { /* Target the div wrapping each radio */
+            display: block; /* Each role on a new line */
+            margin-bottom: 8px;
+        }
+        .roles-container .form-group div.role-item-container label{
+            margin-left: 2px; /* Small space after radio */
+        }
+
+    </style>
+</head>
+<body style="overflow-y: hidden">
+
+<div class="app-container">
+    <aside class="sidebar" th:replace="~{fragments/sidebar :: sidebar}"></aside>
+    <main class="main-content">
+        <header class="header">
+            <h1 th:text="${isEditMode} ? 'Edit User - ' + ${userForm.email} : 'Create New User'"></h1>
+            <div class="user-profile">
+                <span sec:authentication="principal.username">user@example.com</span>
+                <form th:action="@{/logout}" method="post"><button type="submit" class="btn-logout">Logout</button></form>
+            </div>
+        </header>
+
+        <div class="page-content">
+            <div class="form-container">
+                <div th:if="${pageErrorMessage}" class="alert-flash alert-danger-flash" th:text="${pageErrorMessage}"></div>
+
+                <form th:action="${isEditMode} ? @{/admin/users/update} : @{/admin/users/save}" th:object="${userForm}" method="post" id="userFormElement">
+                    <input type="hidden" th:if="${isEditMode}" th:field="*{userId}" />
+
+                    <div class="form-section">
+                        <h3>User Information</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="firstName">First Name</label>
+                                <input type="text" id="firstName" th:field="*{firstName}" required>
+                                <small class="text-danger" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></small>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Last Name</label>
+                                <input type="text" id="lastName" th:field="*{lastName}" required>
+                                <small class="text-danger" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></small>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" th:field="*{email}" required>
+                                <small class="text-danger" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></small>
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <input type="password" id="password" th:field="*{password}" th:required="${not isEditMode}" autocomplete="new-password">
+                                <small th:if="${isEditMode}" style="font-size: 0.8em; color: #6c757d;">Leave blank to keep current password.</small>
+                                <small class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section roles-container">
+                        <h3>Department & Role</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="departmentId">Department</label>
+                                <select id="departmentId" th:field="*{departmentId}">
+                                    <option value="">Select a Department</option>
+                                    <option th:each="dept : ${departments}"
+                                            th:value="${dept.departmentId}"
+                                            th:text="${dept.departmentName}"></option>
+                                </select>
+                                <small class="text-danger" th:if="${#fields.hasErrors('departmentId')}" th:errors="*{departmentId}"></small>
+                            </div>
+                            <div class="form-group">
+                                <label>Role</label>
+                                <div class="radio-group">
+                                    <th:block th:each="role : ${allRoles}">
+                                        <div class="role-item-container"> <!-- Wrapper for each radio and label -->
+                                            <input type="radio" th:field="*{roleId}" th:value="${role.roleId}" th:id="${'role-' + role.roleId}" name="roleId" required onchange="handleRoleChange()"/>
+                                            <label th:for="${'role-' + role.roleId}" th:text="${role.roleName}"></label>
+                                        </div>
+                                    </th:block>
+                                </div>
+                                <small class="text-danger" th:if="${#fields.hasErrors('roleId')}" th:errors="*{roleId}"></small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section" th:if="${isEditMode}">
+                        <h3>Account Status</h3>
+                        <div class="form-group">
+                            <div class="form-check" style="padding-left: 0;"> <!-- Align with other form groups -->
+                                <input class="form-check-input" type="checkbox" id="formerEmployee" th:field="*{formerEmployee}" style="width: auto; margin-right: 8px;">
+                                <label class="form-check-label" for="formerEmployee" style="font-weight: normal;">
+                                    Mark as Former Employee (Account Deactivated)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <a th:href="@{/admin/users}" class="btn btn-secondary" style="background-color: #6c757d; color: white;">Cancel</a>
+                        <button type="submit" class="btn btn-primary" th:text="${isEditMode} ? 'Update User' : 'Create User'"></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const AUDITOR_ROLE_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).AUDITOR_ROLE_NAME}]]*/ 'Auditor';
+    const DIRECTOR_ROLE_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).DIRECTOR_ROLE_NAME}]]*/ 'Director';
+    const ADMIN_ROLE_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).ADMIN_ROLE_NAME}]]*/ 'Admin';
+    const FINANCE_ROLE_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).FINANCE_ROLE_NAME}]]*/ 'Finance Officer'; // Ensure this matches the constant
+    const FINANCE_DEPARTMENT_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).FINANCE_DEPARTMENT_NAME}]]*/ 'Finance';
+
+    const allRolesJs = /*[[${allRoles}]]*/ [];
+    const allDepartmentsJs = /*[[${departments}]]*/ [];
+
+    function handleRoleChange() {
+        const departmentDropdown = document.getElementById('departmentId');
+        const selectedRoleRadio = document.querySelector('input[name="roleId"]:checked');
+
+        if (!departmentDropdown) return; // Should not happen
+
+        if (!selectedRoleRadio) {
+            departmentDropdown.disabled = false;
+            departmentDropdown.required = true; // Default to required if no role picked yet (create mode)
+            return;
+        }
+
+        const selectedRoleId = parseInt(selectedRoleRadio.value);
+        let selectedRoleName = '';
+        allRolesJs.forEach(function(role) {
+            if (role.roleId === selectedRoleId) {
+                selectedRoleName = role.roleName;
+            }
+        });
+
+        const isGlobalRole = [AUDITOR_ROLE_NAME_JS, DIRECTOR_ROLE_NAME_JS, ADMIN_ROLE_NAME_JS].includes(selectedRoleName);
+        const isFinanceRole = selectedRoleName === FINANCE_ROLE_NAME_JS;
+
+        if (isGlobalRole) {
+            departmentDropdown.value = '';
+            departmentDropdown.disabled = true;
+            departmentDropdown.required = false;
+        } else if (isFinanceRole) {
+            let financeDeptId = null;
+            allDepartmentsJs.forEach(function(dept) {
+                if (dept.departmentName === FINANCE_DEPARTMENT_NAME_JS) {
+                    financeDeptId = dept.departmentId;
+                }
+            });
+            if (financeDeptId) {
+                departmentDropdown.value = financeDeptId;
+                departmentDropdown.disabled = true;
+                departmentDropdown.required = true;
+            } else {
+                console.error("Finance Department ID not found in JS data for department name: " + FINANCE_DEPARTMENT_NAME_JS);
+                departmentDropdown.disabled = false;
+                departmentDropdown.required = true;
+            }
+        } else {
+            departmentDropdown.disabled = false;
+            departmentDropdown.required = true;
+            // If a global/finance role was previously selected and department was cleared,
+            // and now a non-global/non-finance role is selected, the department might be empty.
+            // The 'required' attribute will prompt the user if they try to submit.
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        handleRoleChange();
+    });
+    /*]]>*/
+</script>
+</body>
+</html>
