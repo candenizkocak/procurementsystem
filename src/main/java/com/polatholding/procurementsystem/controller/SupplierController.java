@@ -15,7 +15,6 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/suppliers")
-@PreAuthorize("hasRole('ProcurementManager')")
 public class SupplierController {
 
     private final SupplierService supplierService;
@@ -44,12 +43,14 @@ public class SupplierController {
     }
 
     @GetMapping("/new")
+    @PreAuthorize("@securityHelper.isProcurementStaff(authentication)")
     public String showNewSupplierForm(Model model) {
         model.addAttribute("supplierFormDto", new SupplierFormDto());
         return "supplier-form";
     }
 
     @PostMapping("/save")
+    @PreAuthorize("@securityHelper.isProcurementStaff(authentication)")
     public String saveNewSupplier(@Valid @ModelAttribute("supplierFormDto") SupplierFormDto formDto,
                                   BindingResult bindingResult,
                                   RedirectAttributes redirectAttributes) {
@@ -62,6 +63,7 @@ public class SupplierController {
     }
 
     @PostMapping("/approve/{id}")
+    @PreAuthorize("hasRole('ProcurementManager')")
     public String approveSupplier(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
         supplierService.approveSupplier(id);
         redirectAttributes.addFlashAttribute("successMessage", "Supplier approved and is now active.");
@@ -69,6 +71,7 @@ public class SupplierController {
     }
 
     @PostMapping("/reject/{id}")
+    @PreAuthorize("hasRole('ProcurementManager')")
     public String rejectSupplier(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
         supplierService.rejectSupplier(id);
         redirectAttributes.addFlashAttribute("successMessage", "Supplier has been rejected.");

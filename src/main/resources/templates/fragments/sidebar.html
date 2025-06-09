@@ -18,7 +18,7 @@
             <a th:href="@{/approvals}">Approvals</a>
         </li>
         <li class="nav-item" th:classappend="${#strings.startsWith(currentUrl, '/suppliers')} ? 'active' : ''"
-            sec:authorize="hasAnyRole('ProcurementManager', 'Employee')">
+            sec:authorize="isAuthenticated()">
             <a th:href="@{/suppliers}">Suppliers</a>
         </li>
         <li class="nav-item" th:classappend="${#strings.startsWith(currentUrl, '/budgets')} ? 'active' : ''"
