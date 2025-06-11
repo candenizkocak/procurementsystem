@@ -3,6 +3,7 @@ package com.polatholding.procurementsystem.controller;
 import com.polatholding.procurementsystem.dto.PurchaseRequestDetailDto;
 import com.polatholding.procurementsystem.dto.PurchaseRequestFormDto;
 import com.polatholding.procurementsystem.service.PurchaseRequestService;
+import com.polatholding.procurementsystem.service.RequestHistoryService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -17,9 +18,12 @@ import java.security.Principal;
 public class PurchaseRequestController {
 
     private final PurchaseRequestService purchaseRequestService;
+    private final RequestHistoryService requestHistoryService;
 
-    public PurchaseRequestController(PurchaseRequestService purchaseRequestService) {
+    public PurchaseRequestController(PurchaseRequestService purchaseRequestService,
+                                     RequestHistoryService requestHistoryService) {
         this.purchaseRequestService = purchaseRequestService;
+        this.requestHistoryService = requestHistoryService;
     }
 
     @GetMapping("/new")

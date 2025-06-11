@@ -3,6 +3,7 @@ package com.polatholding.procurementsystem.service;
 import com.polatholding.procurementsystem.exception.InsufficientBudgetException;
 import com.polatholding.procurementsystem.model.*;
 import com.polatholding.procurementsystem.repository.*;
+import com.polatholding.procurementsystem.service.RequestHistoryService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class ApprovalServiceImpl implements ApprovalService {
     private final ExchangeRateRepository exchangeRateRepository;
     private final ApprovalStepRepository approvalStepRepository;
     private final BudgetCodeRepository budgetCodeRepository;
+    private final RequestHistoryService requestHistoryService;
 
     private static final BigDecimal HIGH_VALUE_THRESHOLD = new BigDecimal("1000000");
     private static final String DIRECTOR_ROLE_NAME = "Director";
@@ -30,13 +32,15 @@ public class ApprovalServiceImpl implements ApprovalService {
                                ApprovalRepository approvalRepository,
                                ExchangeRateRepository exchangeRateRepository,
                                ApprovalStepRepository approvalStepRepository,
-                               BudgetCodeRepository budgetCodeRepository) {
+                               BudgetCodeRepository budgetCodeRepository,
+                               RequestHistoryService requestHistoryService) {
         this.purchaseRequestRepository = purchaseRequestRepository;
         this.userRepository = userRepository;
         this.approvalRepository = approvalRepository;
         this.exchangeRateRepository = exchangeRateRepository;
         this.approvalStepRepository = approvalStepRepository;
         this.budgetCodeRepository = budgetCodeRepository;
+        this.requestHistoryService = requestHistoryService;
     }
 
     @Override
@@ -80,6 +84,7 @@ public class ApprovalServiceImpl implements ApprovalService {
         request.setRejectReason(comments);
 
         purchaseRequestRepository.save(request);
+        requestHistoryService.logAction(requestId, userEmail, "Returned for Edit", comments);
     }
 
     private void processDepartmentManagerApproval(PurchaseRequest request, User approver) {
@@ -104,6 +109,9 @@ public class ApprovalServiceImpl implements ApprovalService {
         } else {
             consumeBudgetForRequest(request);
             request.setStatus("Approved");
+            purchaseRequestRepository.save(request);
+            requestHistoryService.logAction(request.getRequestId(), approver.getEmail(), "Approved", null);
+            return;
         }
         purchaseRequestRepository.save(request);
     }
@@ -117,6 +125,7 @@ public class ApprovalServiceImpl implements ApprovalService {
         consumeBudgetForRequest(request);
         request.setStatus("Approved");
         purchaseRequestRepository.save(request);
+        requestHistoryService.logAction(request.getRequestId(), approver.getEmail(), "Approved", null);
     }
 
     private void processRejection(PurchaseRequest request, User approver, String reason) {
@@ -124,6 +133,7 @@ public class ApprovalServiceImpl implements ApprovalService {
         request.setStatus("Rejected");
         request.setRejectReason(reason);
         purchaseRequestRepository.save(request);
+        requestHistoryService.logAction(request.getRequestId(), approver.getEmail(), "Rejected", reason);
     }
 
     private void consumeBudgetForRequest(PurchaseRequest request) {

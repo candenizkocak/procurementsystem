@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Department Management</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body style="overflow-y: hidden">
+<div class="app-container">
+    <aside class="sidebar" th:replace="~{fragments/sidebar :: sidebar}"></aside>
+    <main class="main-content">
+        <header class="header">
+            <h1>Department Management</h1>
+            <div class="user-profile">
+                <span sec:authentication="principal.username">user@example.com</span>
+                <form th:action="@{/logout}" method="post"><button type="submit" class="btn-logout">Logout</button></form>
+            </div>
+        </header>
+        <div class="page-content">
+            <div style="margin-bottom:20px;text-align:right;">
+                <a th:href="@{/admin/departments/new}" class="btn btn-primary">Add Department</a>
+            </div>
+            <div th:if="${successMessage}" class="alert-flash alert-success-flash" th:text="${successMessage}"></div>
+            <div th:if="${errorMessage}" class="alert-flash alert-danger-flash" th:text="${errorMessage}"></div>
+            <table class="content-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${departments.isEmpty()}">
+                    <td colspan="3" style="text-align: center;">No departments found.</td>
+                </tr>
+                <tr th:each="dept : ${departments}">
+                    <td th:text="${dept.departmentId}"></td>
+                    <td th:text="${dept.departmentName}"></td>
+                    <td>
+                        <a th:href="@{/admin/departments/edit/{id}(id=${dept.departmentId})}" class="btn btn-warning btn-sm">Edit</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+</body>
+</html>

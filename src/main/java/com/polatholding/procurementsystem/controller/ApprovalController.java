@@ -3,6 +3,7 @@ package com.polatholding.procurementsystem.controller;
 import com.polatholding.procurementsystem.dto.PurchaseRequestDto;
 import com.polatholding.procurementsystem.service.ApprovalService;
 import com.polatholding.procurementsystem.service.PurchaseRequestService;
+import com.polatholding.procurementsystem.service.RequestHistoryService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,10 +22,13 @@ public class ApprovalController {
 
     private final PurchaseRequestService purchaseRequestService;
     private final ApprovalService approvalService;
+    private final RequestHistoryService requestHistoryService;
 
-    public ApprovalController(PurchaseRequestService purchaseRequestService, ApprovalService approvalService) {
+    public ApprovalController(PurchaseRequestService purchaseRequestService, ApprovalService approvalService,
+                              RequestHistoryService requestHistoryService) {
         this.purchaseRequestService = purchaseRequestService;
         this.approvalService = approvalService;
+        this.requestHistoryService = requestHistoryService;
     }
 
     @GetMapping

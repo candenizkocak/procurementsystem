@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Request Logs</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body style="overflow-y: hidden">
+<div class="app-container">
+    <aside class="sidebar" th:replace="~{fragments/sidebar :: sidebar}"></aside>
+    <main class="main-content">
+        <header class="header">
+            <h1>Request Logs</h1>
+            <div class="user-profile">
+                <span sec:authentication="principal.username">user@example.com</span>
+                <form th:action="@{/logout}" method="post"><button type="submit" class="btn-logout">Logout</button></form>
+            </div>
+        </header>
+        <div class="page-content">
+            <table class="content-table">
+                <thead>
+                <tr>
+                    <th>Request ID</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Details</th>
+                    <th>Date</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${logs.isEmpty()}">
+                    <td colspan="5" style="text-align:center;">No log entries found.</td>
+                </tr>
+                <tr th:each="log : ${logs}">
+                    <td th:text="${log.requestId}"></td>
+                    <td th:text="${log.userEmail}"></td>
+                    <td th:text="${log.action}"></td>
+                    <td th:text="${log.details}"></td>
+                    <td th:text="${#temporals.format(log.eventDate, 'dd-MMM-yyyy HH:mm')}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+</body>
+</html>
