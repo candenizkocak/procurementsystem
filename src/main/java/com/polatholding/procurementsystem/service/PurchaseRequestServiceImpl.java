@@ -4,6 +4,7 @@ import com.polatholding.procurementsystem.dto.*;
 import com.polatholding.procurementsystem.exception.InsufficientBudgetException;
 import com.polatholding.procurementsystem.model.*;
 import com.polatholding.procurementsystem.repository.*;
+import com.polatholding.procurementsystem.service.RequestHistoryService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
     private final SupplierRepository supplierRepository;
     private final UnitRepository unitRepository;
     private final ExchangeRateRepository exchangeRateRepository;
+    private final RequestHistoryService requestHistoryService;
 
     private static final String DIRECTOR_ROLE_NAME = "Director";
     private static final String PROCUREMENT_MANAGER_ROLE_NAME = "ProcurementManager";
@@ -34,7 +36,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
     private static final BigDecimal HIGH_VALUE_THRESHOLD = new BigDecimal("1000000");
 
 
-    public PurchaseRequestServiceImpl(PurchaseRequestRepository purchaseRequestRepository, UserRepository userRepository, BudgetCodeRepository budgetCodeRepository, CurrencyRepository currencyRepository, SupplierRepository supplierRepository, UnitRepository unitRepository, ExchangeRateRepository exchangeRateRepository) {
+    public PurchaseRequestServiceImpl(PurchaseRequestRepository purchaseRequestRepository, UserRepository userRepository, BudgetCodeRepository budgetCodeRepository, CurrencyRepository currencyRepository, SupplierRepository supplierRepository, UnitRepository unitRepository, ExchangeRateRepository exchangeRateRepository, RequestHistoryService requestHistoryService) {
         this.purchaseRequestRepository = purchaseRequestRepository;
         this.userRepository = userRepository;
         this.budgetCodeRepository = budgetCodeRepository;
@@ -42,6 +44,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         this.supplierRepository = supplierRepository;
         this.unitRepository = unitRepository;
         this.exchangeRateRepository = exchangeRateRepository;
+        this.requestHistoryService = requestHistoryService;
     }
 
     @Override
@@ -143,6 +146,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         }
         requestToUpdate.setRejectReason(null);
         purchaseRequestRepository.save(requestToUpdate);
+        requestHistoryService.logAction(requestId, userEmail, "Resubmitted", null);
     }
 
     @Override
