@@ -53,7 +53,6 @@ public interface PurchaseRequestRepository extends JpaRepository<PurchaseRequest
             "LEFT JOIN FETCH pr.items i " +
             "LEFT JOIN FETCH i.supplier " +
             "LEFT JOIN FETCH i.unit " +
-            "LEFT JOIN FETCH pr.files f " +
             "WHERE pr.requestId = :requestId")
     Optional<PurchaseRequest> findByIdWithAllDetails(@Param("requestId") Integer requestId);
 
