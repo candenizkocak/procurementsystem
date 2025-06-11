@@ -5,6 +5,8 @@ import com.polatholding.procurementsystem.exception.InsufficientBudgetException;
 import com.polatholding.procurementsystem.model.*;
 import com.polatholding.procurementsystem.repository.*;
 import com.polatholding.procurementsystem.service.RequestHistoryService;
+import com.polatholding.procurementsystem.service.FileService;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
     private final UnitRepository unitRepository;
     private final ExchangeRateRepository exchangeRateRepository;
     private final RequestHistoryService requestHistoryService;
+    private final FileService fileService;
 
     private static final String DIRECTOR_ROLE_NAME = "Director";
     private static final String PROCUREMENT_MANAGER_ROLE_NAME = "ProcurementManager";
@@ -36,7 +39,15 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
     private static final BigDecimal HIGH_VALUE_THRESHOLD = new BigDecimal("1000000");
 
 
-    public PurchaseRequestServiceImpl(PurchaseRequestRepository purchaseRequestRepository, UserRepository userRepository, BudgetCodeRepository budgetCodeRepository, CurrencyRepository currencyRepository, SupplierRepository supplierRepository, UnitRepository unitRepository, ExchangeRateRepository exchangeRateRepository, RequestHistoryService requestHistoryService) {
+    public PurchaseRequestServiceImpl(PurchaseRequestRepository purchaseRequestRepository,
+                                      UserRepository userRepository,
+                                      BudgetCodeRepository budgetCodeRepository,
+                                      CurrencyRepository currencyRepository,
+                                      SupplierRepository supplierRepository,
+                                      UnitRepository unitRepository,
+                                      ExchangeRateRepository exchangeRateRepository,
+                                      RequestHistoryService requestHistoryService,
+                                      FileService fileService) {
         this.purchaseRequestRepository = purchaseRequestRepository;
         this.userRepository = userRepository;
         this.budgetCodeRepository = budgetCodeRepository;
@@ -45,6 +56,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         this.unitRepository = unitRepository;
         this.exchangeRateRepository = exchangeRateRepository;
         this.requestHistoryService = requestHistoryService;
+        this.fileService = fileService;
     }
 
     @Override
@@ -103,7 +115,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
 
     @Override
     @Transactional
-    public void updateRequest(Integer requestId, PurchaseRequestFormDto formDto, String userEmail) {
+    public void updateRequest(Integer requestId, PurchaseRequestFormDto formDto, String userEmail, List<MultipartFile> files) {
         PurchaseRequest requestToUpdate = purchaseRequestRepository.findByIdWithAllDetails(requestId)
                 .orElseThrow(() -> new RuntimeException("Request not found: " + requestId));
 
@@ -146,12 +158,13 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         }
         requestToUpdate.setRejectReason(null);
         purchaseRequestRepository.save(requestToUpdate);
+        fileService.uploadFiles(requestId, files, userEmail);
         requestHistoryService.logAction(requestId, userEmail, "Resubmitted", null);
     }
 
     @Override
     @Transactional
-    public void saveNewRequest(PurchaseRequestFormDto formDto, String userEmail) {
+    public Integer saveNewRequest(PurchaseRequestFormDto formDto, String userEmail, List<MultipartFile> files) {
         User currentUser = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userEmail));
         BudgetCode budgetCode = budgetCodeRepository.findById(formDto.getBudgetCodeId()).orElseThrow();
@@ -211,6 +224,8 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         }
 
         purchaseRequestRepository.save(newRequest);
+        fileService.uploadFiles(newRequest.getRequestId(), files, userEmail);
+        return newRequest.getRequestId();
     }
 
     private void consumeBudgetForAutoApprovedRequest(PurchaseRequest request) {

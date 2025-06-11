@@ -11,6 +11,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import java.nio.file.Path;
+import java.util.List;
 
 import java.security.Principal;
 
@@ -43,10 +49,11 @@ public class PurchaseRequestController {
     @PostMapping("/save")
     @PreAuthorize("!hasRole('Auditor')")
     public String saveNewRequest(@ModelAttribute("requestForm") PurchaseRequestFormDto formDto,
+                                 @RequestParam(value = "files", required = false) List<MultipartFile> files,
                                  Principal principal,
                                  RedirectAttributes redirectAttributes) {
         try {
-            purchaseRequestService.saveNewRequest(formDto, principal.getName());
+            purchaseRequestService.saveNewRequest(formDto, principal.getName(), files);
             redirectAttributes.addFlashAttribute("successMessage", "Purchase Request created successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error creating request: " + e.getMessage());
@@ -81,10 +88,11 @@ public class PurchaseRequestController {
     @PreAuthorize("!hasRole('Auditor')")
     public String updateRequest(@PathVariable("id") Integer id,
                                 @ModelAttribute("requestForm") PurchaseRequestFormDto formDto,
+                                @RequestParam(value = "files", required = false) List<MultipartFile> files,
                                 Principal principal,
                                 RedirectAttributes redirectAttributes) {
         try {
-            purchaseRequestService.updateRequest(id, formDto, principal.getName());
+            purchaseRequestService.updateRequest(id, formDto, principal.getName(), files);
             redirectAttributes.addFlashAttribute("successMessage", "Request #" + id + " has been updated and resubmitted.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Error updating request: " + e.getMessage());
@@ -100,18 +108,13 @@ public class PurchaseRequestController {
         return "request-details";
     }
 
-    @PostMapping("/{id}/upload")
-    @PreAuthorize("!hasRole('Auditor')")
-    public String uploadFile(@PathVariable("id") Integer id,
-                             @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
-                             Principal principal,
-                             RedirectAttributes redirectAttributes) {
-        try {
-            fileService.uploadFile(id, file, principal.getName());
-            redirectAttributes.addFlashAttribute("successMessage", "File uploaded successfully.");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "File upload failed: " + e.getMessage());
-        }
-        return "redirect:/requests/" + id;
+
+    @GetMapping("/files/{fileId}/download")
+    public ResponseEntity<Resource> downloadFile(@PathVariable("fileId") Integer fileId) throws Exception {
+        Resource resource = fileService.loadAsResource(fileId);
+        String filename = Path.of(resource.getFilename()).getFileName().toString();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                .body(resource);
     }
 }

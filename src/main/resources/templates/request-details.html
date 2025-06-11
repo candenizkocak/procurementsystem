@@ -85,13 +85,10 @@
                     <h3>Attached Files</h3>
                     <ul>
                         <li th:each="file : ${request.files}">
-                            <a th:href="@{'/' + file.filePath}" th:text="${#strings.substring(file.filePath, file.filePath.lastIndexOf('/') + 1)}" download></a>
+                            <a th:href="@{/requests/files/{id}/download(id=${file.fileId})}"
+                               th:text="${#strings.substring(file.filePath, file.filePath.lastIndexOf('/') + 1)}"></a>
                         </li>
                     </ul>
-                    <form th:action="@{/requests/{id}/upload(id=${request.requestId})}" method="post" enctype="multipart/form-data">
-                        <input type="file" name="file" required />
-                        <button type="submit" class="btn btn-primary">Upload</button>
-                    </form>
                 </div>
                 <div class="form-actions">
                     <a th:href="@{/dashboard}" class="btn btn-secondary" style="background-color: #6c757d; color: white;">Back to Dashboard</a>

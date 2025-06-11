@@ -6,6 +6,7 @@ import com.polatholding.procurementsystem.dto.PurchaseRequestDto;
 import com.polatholding.procurementsystem.dto.PurchaseRequestFormDto;
 
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface PurchaseRequestService {
 
@@ -13,11 +14,11 @@ public interface PurchaseRequestService {
 
     NewRequestFormInitDto getNewRequestFormData(String userEmail);
 
-    void saveNewRequest(PurchaseRequestFormDto formDto, String userEmail);
+    Integer saveNewRequest(PurchaseRequestFormDto formDto, String userEmail, List<MultipartFile> files);
 
     PurchaseRequestFormDto getRequestFormById(Integer requestId);
 
-    void updateRequest(Integer requestId, PurchaseRequestFormDto formDto, String userEmail);
+    void updateRequest(Integer requestId, PurchaseRequestFormDto formDto, String userEmail, List<MultipartFile> files);
 
     String getUserFullName(String userEmail);
 
