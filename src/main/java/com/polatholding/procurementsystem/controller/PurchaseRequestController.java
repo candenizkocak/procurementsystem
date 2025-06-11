@@ -4,6 +4,7 @@ import com.polatholding.procurementsystem.dto.PurchaseRequestDetailDto;
 import com.polatholding.procurementsystem.dto.PurchaseRequestFormDto;
 import com.polatholding.procurementsystem.service.PurchaseRequestService;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,7 @@ public class PurchaseRequestController {
     }
 
     @GetMapping("/new")
+    @PreAuthorize("!hasRole('Auditor')")
     public String showNewRequestForm(Model model, Principal principal) {
         model.addAttribute("formData", purchaseRequestService.getNewRequestFormData(principal.getName()));
         model.addAttribute("requestForm", new PurchaseRequestFormDto());
@@ -31,6 +33,7 @@ public class PurchaseRequestController {
     }
 
     @PostMapping("/save")
+    @PreAuthorize("!hasRole('Auditor')")
     public String saveNewRequest(@ModelAttribute("requestForm") PurchaseRequestFormDto formDto,
                                  Principal principal,
                                  RedirectAttributes redirectAttributes) {
@@ -48,6 +51,7 @@ public class PurchaseRequestController {
      * NEW: Displays the request form in edit mode, pre-filled with data.
      */
     @GetMapping("/{id}/edit")
+    @PreAuthorize("!hasRole('Auditor')")
     public String showEditRequestForm(@PathVariable("id") Integer id, Model model, Principal principal) {
         // Security check: Ensure the user is the creator of the request
         PurchaseRequestDetailDto requestDetails = purchaseRequestService.getRequestDetailsById(id);
@@ -66,6 +70,7 @@ public class PurchaseRequestController {
      * NEW: Processes the form submission for an existing request.
      */
     @PostMapping("/{id}/update")
+    @PreAuthorize("!hasRole('Auditor')")
     public String updateRequest(@PathVariable("id") Integer id,
                                 @ModelAttribute("requestForm") PurchaseRequestFormDto formDto,
                                 Principal principal,
