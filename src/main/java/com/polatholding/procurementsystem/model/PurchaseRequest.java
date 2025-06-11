@@ -57,4 +57,8 @@ public class PurchaseRequest {
 
     @OneToMany(mappedBy = "purchaseRequest", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<PurchaseRequestItem> items;
+
+    // Files attached to this request
+    @OneToMany(mappedBy = "purchaseRequest", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<File> files;
 }

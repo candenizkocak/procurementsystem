@@ -4,6 +4,7 @@ import com.polatholding.procurementsystem.dto.PurchaseRequestDetailDto;
 import com.polatholding.procurementsystem.dto.PurchaseRequestFormDto;
 import com.polatholding.procurementsystem.service.PurchaseRequestService;
 import com.polatholding.procurementsystem.service.RequestHistoryService;
+import com.polatholding.procurementsystem.service.FileService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -19,11 +20,14 @@ public class PurchaseRequestController {
 
     private final PurchaseRequestService purchaseRequestService;
     private final RequestHistoryService requestHistoryService;
+    private final FileService fileService;
 
     public PurchaseRequestController(PurchaseRequestService purchaseRequestService,
-                                     RequestHistoryService requestHistoryService) {
+                                     RequestHistoryService requestHistoryService,
+                                     FileService fileService) {
         this.purchaseRequestService = purchaseRequestService;
         this.requestHistoryService = requestHistoryService;
+        this.fileService = fileService;
     }
 
     @GetMapping("/new")
@@ -94,5 +98,20 @@ public class PurchaseRequestController {
         PurchaseRequestDetailDto requestDetails = purchaseRequestService.getRequestDetailsById(id);
         model.addAttribute("request", requestDetails);
         return "request-details";
+    }
+
+    @PostMapping("/{id}/upload")
+    @PreAuthorize("!hasRole('Auditor')")
+    public String uploadFile(@PathVariable("id") Integer id,
+                             @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+                             Principal principal,
+                             RedirectAttributes redirectAttributes) {
+        try {
+            fileService.uploadFile(id, file, principal.getName());
+            redirectAttributes.addFlashAttribute("successMessage", "File uploaded successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "File upload failed: " + e.getMessage());
+        }
+        return "redirect:/requests/" + id;
     }
 }

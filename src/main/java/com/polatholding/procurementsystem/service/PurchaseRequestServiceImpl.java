@@ -308,6 +308,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         dto.setGrossAmount(request.getGrossAmount());
         dto.setCurrencyCode(request.getCurrency().getCurrencyCode());
         dto.setItems(request.getItems());
+        dto.setFiles(request.getFiles());
         return dto;
     }
     @Override
