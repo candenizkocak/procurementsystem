@@ -12,4 +12,5 @@ public interface BudgetService {
     void createNewBudget(BudgetFormDto formDto);
     BudgetFormDto getBudgetFormById(Integer budgetId);
     void updateBudget(Integer budgetId, BudgetFormDto formDto);
+    BudgetDto getBudgetById(Integer budgetId);
 }

@@ -82,4 +82,27 @@ public class SupplierServiceImpl implements SupplierService {
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public SupplierFormDto getSupplierFormById(Integer supplierId) {
+        Supplier supplier = supplierRepository.findById(supplierId)
+                .orElseThrow(() -> new RuntimeException("Supplier not found"));
+        SupplierFormDto dto = new SupplierFormDto();
+        BeanUtils.copyProperties(supplier, dto);
+        return dto;
+    }
+
+    @Override
+    @Transactional
+    public void updateSupplier(Integer supplierId, SupplierFormDto formDto) {
+        Supplier supplierToUpdate = supplierRepository.findById(supplierId)
+                .orElseThrow(() -> new RuntimeException("Supplier not found"));
+        supplierToUpdate.setSupplierName(formDto.getSupplierName());
+        supplierToUpdate.setContactPerson(formDto.getContactPerson());
+        supplierToUpdate.setEmail(formDto.getEmail());
+        supplierToUpdate.setPhone(formDto.getPhone());
+        supplierToUpdate.setAddress(formDto.getAddress());
+        supplierRepository.save(supplierToUpdate);
+    }
 }

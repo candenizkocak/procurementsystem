@@ -46,7 +46,7 @@
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Status</th>
-                    <th sec:authorize="hasRole('ProcurementManager')">Actions</th>
+                    <th sec:authorize="@securityHelper.isProcurementStaff(authentication)">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -68,8 +68,10 @@
                               th:text="${supplier.status}">
                         </span>
                     </td>
-                    <td sec:authorize="hasRole('ProcurementManager')">
-                        <div class="actions-container" th:if="${#strings.equals(supplier.status, 'Pending')}">
+                    <td>
+                        <a th:href="@{/suppliers/{id}/edit(id=${supplier.supplierId})}" class="btn btn-warning btn-sm"
+                           sec:authorize="@securityHelper.isProcurementStaff(authentication)">Edit</a>
+                        <div class="actions-container" th:if="${#strings.equals(supplier.status, 'Pending')}" sec:authorize="hasRole('ProcurementManager')">
                             <form th:action="@{/suppliers/approve/{id}(id=${supplier.supplierId})}" method="post" style="display: inline;">
                                 <button type="submit" class="btn btn-success btn-sm">Approve</button>
                             </form>

@@ -26,7 +26,7 @@
         <div class="page-content">
             <!-- Action Button to create a new budget -->
             <div style="margin-bottom: 20px; text-align: right;">
-                <a th:href="@{/budgets/new}" class="btn btn-primary">Add New Budget</a>
+                <a th:href="@{/budgets/new}" class="btn btn-primary" sec:authorize="hasRole('Finance Officer')">Add New Budget</a>
             </div>
 
             <!-- Flash Messages -->
@@ -62,7 +62,7 @@
                         </span>
                     </td>
                     <td>
-                        <a th:href="@{/budgets/{id}/edit(id=${budget.budgetCodeId})}" class="btn btn-warning btn-sm">Edit</a>
+                        <a th:href="@{/budgets/{id}/edit(id=${budget.budgetCodeId})}" class="btn btn-warning btn-sm" sec:authorize="hasRole('Finance Officer')">Edit</a>
                     </td>
                 </tr>
                 </tbody>

@@ -88,6 +88,14 @@ public class BudgetServiceImpl implements BudgetService {
         budgetCodeRepository.save(budgetCodeToUpdate);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public BudgetDto getBudgetById(Integer budgetId) {
+        BudgetCode budgetCode = budgetCodeRepository.findById(budgetId)
+                .orElseThrow(() -> new RuntimeException("Budget not found with id: " + budgetId));
+        return convertToDto(budgetCode);
+    }
+
     private BudgetDto convertToDto(BudgetCode budgetCode) {
         BudgetDto dto = new BudgetDto();
         BeanUtils.copyProperties(budgetCode, dto);

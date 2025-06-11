@@ -12,7 +12,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/budgets")
-@PreAuthorize("hasRole('Finance Officer')")
+@PreAuthorize("hasAnyRole('Finance Officer','Auditor')")
 public class BudgetController {
 
     private final BudgetService budgetService;
@@ -28,6 +28,7 @@ public class BudgetController {
     }
 
     @GetMapping("/new")
+    @PreAuthorize("hasRole('Finance Officer')")
     public String showNewBudgetForm(Model model) {
         model.addAttribute("budgetFormDto", new BudgetFormDto());
         model.addAttribute("departments", budgetService.getAllDepartments());
@@ -36,6 +37,7 @@ public class BudgetController {
     }
 
     @PostMapping("/save")
+    @PreAuthorize("hasRole('Finance Officer')")
     public String saveNewBudget(@Valid @ModelAttribute("budgetFormDto") BudgetFormDto formDto,
                                 BindingResult bindingResult,
                                 Model model,
@@ -51,6 +53,7 @@ public class BudgetController {
     }
 
     @GetMapping("/{id}/edit")
+    @PreAuthorize("hasRole('Finance Officer')")
     public String showEditBudgetForm(@PathVariable("id") Integer id, Model model) {
         model.addAttribute("budgetFormDto", budgetService.getBudgetFormById(id));
         model.addAttribute("departments", budgetService.getAllDepartments());
@@ -59,6 +62,7 @@ public class BudgetController {
     }
 
     @PostMapping("/{id}/update")
+    @PreAuthorize("hasRole('Finance Officer')")
     public String updateBudget(@PathVariable("id") Integer id,
                                @Valid @ModelAttribute("budgetFormDto") BudgetFormDto formDto,
                                BindingResult bindingResult,

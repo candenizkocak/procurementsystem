@@ -38,6 +38,7 @@ public class ReportServiceImpl implements ReportService {
 
         for (BudgetCode budget : allBudgets) {
             BudgetStatusDto dto = new BudgetStatusDto();
+            dto.setBudgetCodeId(budget.getBudgetCodeId());
             dto.setDepartmentName(budget.getDepartment().getDepartmentName());
             dto.setBudgetCode(budget.getCode());
             dto.setYear(budget.getYear());

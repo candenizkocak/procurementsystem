@@ -3,6 +3,7 @@ package com.polatholding.procurementsystem.controller;
 import com.polatholding.procurementsystem.dto.PurchaseRequestDto;
 import com.polatholding.procurementsystem.service.ApprovalService;
 import com.polatholding.procurementsystem.service.PurchaseRequestService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +28,7 @@ public class ApprovalController {
     }
 
     @GetMapping
+    @PreAuthorize("!hasRole('Auditor')")
     public String showMyApprovals(Model model, Principal principal) {
         String userEmail = principal.getName();
         List<PurchaseRequestDto> approvalRequests = purchaseRequestService.getPendingApprovalsForUser(userEmail);
@@ -35,6 +37,7 @@ public class ApprovalController {
     }
 
     @PostMapping("/process")
+    @PreAuthorize("!hasRole('Auditor')")
     public String processApprovalDecision(@RequestParam int requestId,
                                           @RequestParam String decision,
                                           @RequestParam(required = false) String rejectReason,
@@ -54,6 +57,7 @@ public class ApprovalController {
     }
 
     @PostMapping("/return")
+    @PreAuthorize("!hasRole('Auditor')")
     public String returnRequestForEdit(@RequestParam int requestId,
                                        @RequestParam String comments,
                                        Principal principal,
