@@ -8,6 +8,7 @@ import lombok.Data;
 
 @Data
 public class SupplierFormDto {
+    private Integer supplierId;
     @NotEmpty(message = "Supplier name cannot be empty.")
     @Size(max = 100, message = "Supplier name cannot exceed 100 characters.")
     private String supplierName;
