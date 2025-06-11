@@ -108,6 +108,13 @@ public class AdminController {
             model.addAttribute("isEditMode", true);
             model.addAttribute("pageErrorMessage", e.getMessage());
             return "admin-user-form";
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            model.addAttribute("departments", adminService.getAllDepartments());
+            model.addAttribute("allRoles", adminService.getAllRoles());
+            model.addAttribute("isEditMode", true);
+            String message = e.getMostSpecificCause() != null ? e.getMostSpecificCause().getMessage() : "Invalid data";
+            model.addAttribute("pageErrorMessage", "Data integrity violation: " + message);
+            return "admin-user-form";
         } catch (Exception e) {
             model.addAttribute("departments", adminService.getAllDepartments());
             model.addAttribute("allRoles", adminService.getAllRoles());
