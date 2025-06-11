@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/reports")
-@PreAuthorize("hasAnyRole('Finance Officer', 'ProcurementManager')")
+@PreAuthorize("hasAnyRole('Finance Officer', 'ProcurementManager', 'Auditor')")
 public class ReportController {
 
     private final ReportService reportService;
