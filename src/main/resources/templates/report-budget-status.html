@@ -40,7 +40,7 @@
                 <tr th:if="${reportData.isEmpty()}">
                     <td colspan="7" style="text-align: center;">No budget data available to report.</td>
                 </tr>
-                <tr th:each="item : ${reportData}">
+                <tr th:each="item : ${reportData}" class="clickable-row" th:attr="data-href=@{/reports/budget-status/{id}/requests(id=${item.budgetCodeId})}">
                     <td th:text="${item.departmentName}"></td>
                     <td th:text="${item.budgetCode}"></td>
                     <td th:text="${item.year}"></td>
@@ -62,6 +62,15 @@
         </div>
     </main>
 </div>
-
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const rows = document.querySelectorAll("tr[data-href]");
+        rows.forEach(row => {
+            row.addEventListener("click", () => {
+                window.location.href = row.dataset.href;
+            });
+        });
+    });
+</script>
 </body>
 </html>

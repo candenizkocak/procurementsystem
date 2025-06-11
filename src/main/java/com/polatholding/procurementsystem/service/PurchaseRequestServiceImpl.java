@@ -327,4 +327,13 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
                     .collect(Collectors.toList());
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PurchaseRequestDto> getRequestsByBudget(Integer budgetCodeId) {
+        return purchaseRequestRepository.findByBudget(budgetCodeId)
+                .stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
 }

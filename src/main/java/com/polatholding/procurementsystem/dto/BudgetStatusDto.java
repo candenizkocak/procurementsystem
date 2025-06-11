@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 
 @Data
 public class BudgetStatusDto {
+    private Integer budgetCodeId;
     private String departmentName;
     private String budgetCode;
     private int year;

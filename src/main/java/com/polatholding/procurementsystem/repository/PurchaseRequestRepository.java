@@ -64,6 +64,14 @@ public interface PurchaseRequestRepository extends JpaRepository<PurchaseRequest
             "WHERE pr.budgetCode.id = :budgetCodeId AND pr.status = 'Approved'")
     List<PurchaseRequest> findApprovedByBudget(@Param("budgetCodeId") Integer budgetCodeId);
 
+    @Query("SELECT pr FROM PurchaseRequest pr " +
+            "JOIN FETCH pr.createdByUser " +
+            "JOIN FETCH pr.department " +
+            "JOIN FETCH pr.currency " +
+            "WHERE pr.budgetCode.id = :budgetCodeId " +
+            "ORDER BY pr.createdAt DESC")
+    List<PurchaseRequest> findByBudget(@Param("budgetCodeId") Integer budgetCodeId);
+
     @Query(value = "SELECT pr.* FROM PurchaseRequests pr " +
             "JOIN PurchaseRequestItems pri ON pr.RequestID = pri.RequestID " +
             "WHERE FREETEXT((pri.ItemName, pri.Description), :searchTerm)",

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Budget Requests</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body style="overflow-y: hidden">
+<div class="app-container">
+    <aside class="sidebar" th:replace="~{fragments/sidebar :: sidebar}"></aside>
+    <main class="main-content">
+        <header class="header">
+            <h1 th:text="'Requests for Budget ' + ${budget.code}">Budget Requests</h1>
+            <div class="user-profile">
+                <span sec:authentication="principal.username">user@example.com</span>
+                <form th:action="@{/logout}" method="post"><button type="submit" class="btn-logout">Logout</button></form>
+            </div>
+        </header>
+        <div class="page-content">
+            <table class="content-table">
+                <thead>
+                <tr>
+                    <th>Request ID</th>
+                    <th>Created By</th>
+                    <th>Department</th>
+                    <th>Created At</th>
+                    <th>Net Amount</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${requests.isEmpty()}">
+                    <td colspan="6" style="text-align: center;">No requests found for this budget.</td>
+                </tr>
+                <tr th:each="request : ${requests}" class="clickable-row"
+                    th:attr="data-href=@{/requests/{id}(id=${request.requestId})}">
+                    <td th:text="${'#' + request.requestId}"></td>
+                    <td th:text="${request.creatorFullName}"></td>
+                    <td th:text="${request.departmentName}"></td>
+                    <td th:text="${#temporals.format(request.createdAt, 'dd-MMM-yyyy HH:mm')}"></td>
+                    <td th:text="${#numbers.formatDecimal(request.netAmount, 1, 'COMMA', 2, 'POINT') + ' ' + request.currencyCode}"></td>
+                    <td>
+                        <span class="status-badge"
+                              th:classappend="${#strings.toLowerCase(request.status).replace(' ', '-')} == 'pending' ? 'status-pending' :
+                                             (${#strings.toLowerCase(request.status).replace(' ', '-')} == 'approved' ? 'status-approved' :
+                                             (${#strings.toLowerCase(request.status).replace(' ', '-')} == 'rejected' ? 'status-rejected' :
+                                             'status-returned-for-edit'))"
+                              th:text="${request.status}">
+                        </span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const rows = document.querySelectorAll("tr[data-href]");
+        rows.forEach(row => {
+            row.addEventListener("click", () => {
+                window.location.href = row.dataset.href;
+            });
+        });
+    });
+</script>
+</body>
+</html>

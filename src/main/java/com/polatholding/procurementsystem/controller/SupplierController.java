@@ -46,6 +46,7 @@ public class SupplierController {
     @PreAuthorize("@securityHelper.isProcurementStaff(authentication)")
     public String showNewSupplierForm(Model model) {
         model.addAttribute("supplierFormDto", new SupplierFormDto());
+        model.addAttribute("isEditMode", false);
         return "supplier-form";
     }
 
@@ -59,6 +60,30 @@ public class SupplierController {
         }
         supplierService.createNewSupplier(formDto);
         redirectAttributes.addFlashAttribute("successMessage", "New supplier created and sent for approval.");
+        return "redirect:/suppliers";
+    }
+
+    @GetMapping("/{id}/edit")
+    @PreAuthorize("@securityHelper.isProcurementStaff(authentication)")
+    public String showEditSupplierForm(@PathVariable("id") Integer id, Model model) {
+        model.addAttribute("supplierFormDto", supplierService.getSupplierFormById(id));
+        model.addAttribute("isEditMode", true);
+        return "supplier-form";
+    }
+
+    @PostMapping("/{id}/update")
+    @PreAuthorize("@securityHelper.isProcurementStaff(authentication)")
+    public String updateSupplier(@PathVariable("id") Integer id,
+                                 @Valid @ModelAttribute("supplierFormDto") SupplierFormDto formDto,
+                                 BindingResult bindingResult,
+                                 RedirectAttributes redirectAttributes,
+                                 Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("isEditMode", true);
+            return "supplier-form";
+        }
+        supplierService.updateSupplier(id, formDto);
+        redirectAttributes.addFlashAttribute("successMessage", "Supplier updated successfully.");
         return "redirect:/suppliers";
     }
 

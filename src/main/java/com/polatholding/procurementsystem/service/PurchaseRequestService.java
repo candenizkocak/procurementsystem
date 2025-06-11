@@ -25,6 +25,8 @@ public interface PurchaseRequestService {
 
     List<PurchaseRequestDto> getAllRequests();
 
+    List<PurchaseRequestDto> getRequestsByBudget(Integer budgetCodeId);
+
     PurchaseRequestDetailDto getRequestDetailsById(Integer requestId);
 
     List<PurchaseRequestDto> searchUserRequests(String userEmail, String searchTerm);
