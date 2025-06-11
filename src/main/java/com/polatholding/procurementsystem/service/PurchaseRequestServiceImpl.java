@@ -5,6 +5,7 @@ import com.polatholding.procurementsystem.exception.InsufficientBudgetException;
 import com.polatholding.procurementsystem.model.*;
 import com.polatholding.procurementsystem.repository.*;
 import com.polatholding.procurementsystem.service.RequestHistoryService;
+import com.polatholding.procurementsystem.service.NotificationService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
     private final UnitRepository unitRepository;
     private final ExchangeRateRepository exchangeRateRepository;
     private final RequestHistoryService requestHistoryService;
+    private final NotificationService notificationService;
 
     private static final String DIRECTOR_ROLE_NAME = "Director";
     private static final String PROCUREMENT_MANAGER_ROLE_NAME = "ProcurementManager";
@@ -36,7 +38,15 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
     private static final BigDecimal HIGH_VALUE_THRESHOLD = new BigDecimal("1000000");
 
 
-    public PurchaseRequestServiceImpl(PurchaseRequestRepository purchaseRequestRepository, UserRepository userRepository, BudgetCodeRepository budgetCodeRepository, CurrencyRepository currencyRepository, SupplierRepository supplierRepository, UnitRepository unitRepository, ExchangeRateRepository exchangeRateRepository, RequestHistoryService requestHistoryService) {
+    public PurchaseRequestServiceImpl(PurchaseRequestRepository purchaseRequestRepository,
+                                      UserRepository userRepository,
+                                      BudgetCodeRepository budgetCodeRepository,
+                                      CurrencyRepository currencyRepository,
+                                      SupplierRepository supplierRepository,
+                                      UnitRepository unitRepository,
+                                      ExchangeRateRepository exchangeRateRepository,
+                                      RequestHistoryService requestHistoryService,
+                                      NotificationService notificationService) {
         this.purchaseRequestRepository = purchaseRequestRepository;
         this.userRepository = userRepository;
         this.budgetCodeRepository = budgetCodeRepository;
@@ -45,6 +55,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         this.unitRepository = unitRepository;
         this.exchangeRateRepository = exchangeRateRepository;
         this.requestHistoryService = requestHistoryService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -211,6 +222,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         }
 
         purchaseRequestRepository.save(newRequest);
+        notificationService.sendAppNotification(userEmail, newRequest.getRequestId(), "Purchase request submitted.");
     }
 
     private void consumeBudgetForAutoApprovedRequest(PurchaseRequest request) {

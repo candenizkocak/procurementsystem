@@ -4,6 +4,7 @@ import com.polatholding.procurementsystem.exception.InsufficientBudgetException;
 import com.polatholding.procurementsystem.model.*;
 import com.polatholding.procurementsystem.repository.*;
 import com.polatholding.procurementsystem.service.RequestHistoryService;
+import com.polatholding.procurementsystem.service.NotificationService;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class ApprovalServiceImpl implements ApprovalService {
     private final ApprovalStepRepository approvalStepRepository;
     private final BudgetCodeRepository budgetCodeRepository;
     private final RequestHistoryService requestHistoryService;
+    private final NotificationService notificationService;
 
     private static final BigDecimal HIGH_VALUE_THRESHOLD = new BigDecimal("1000000");
     private static final String DIRECTOR_ROLE_NAME = "Director";
@@ -33,7 +35,8 @@ public class ApprovalServiceImpl implements ApprovalService {
                                ExchangeRateRepository exchangeRateRepository,
                                ApprovalStepRepository approvalStepRepository,
                                BudgetCodeRepository budgetCodeRepository,
-                               RequestHistoryService requestHistoryService) {
+                               RequestHistoryService requestHistoryService,
+                               NotificationService notificationService) {
         this.purchaseRequestRepository = purchaseRequestRepository;
         this.userRepository = userRepository;
         this.approvalRepository = approvalRepository;
@@ -41,6 +44,7 @@ public class ApprovalServiceImpl implements ApprovalService {
         this.approvalStepRepository = approvalStepRepository;
         this.budgetCodeRepository = budgetCodeRepository;
         this.requestHistoryService = requestHistoryService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -85,6 +89,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 
         purchaseRequestRepository.save(request);
         requestHistoryService.logAction(requestId, userEmail, "Returned for Edit", comments);
+        notificationService.sendAppNotification(request.getCreatedByUser().getEmail(), request.getRequestId(), "Request returned for edit.");
     }
 
     private void processDepartmentManagerApproval(PurchaseRequest request, User approver) {
@@ -95,6 +100,7 @@ public class ApprovalServiceImpl implements ApprovalService {
         logApprovalAction(request, approver, "Approved", null);
         request.setCurrentApprovalLevel(2);
         purchaseRequestRepository.save(request);
+        notificationService.sendAppNotification(request.getCreatedByUser().getEmail(), request.getRequestId(), "Request approved by manager.");
     }
 
     private void processProcurementManagerApproval(PurchaseRequest request, User approver) {
@@ -111,9 +117,11 @@ public class ApprovalServiceImpl implements ApprovalService {
             request.setStatus("Approved");
             purchaseRequestRepository.save(request);
             requestHistoryService.logAction(request.getRequestId(), approver.getEmail(), "Approved", null);
+            notificationService.sendAppNotification(request.getCreatedByUser().getEmail(), request.getRequestId(), "Request approved.");
             return;
         }
         purchaseRequestRepository.save(request);
+        notificationService.sendAppNotification(request.getCreatedByUser().getEmail(), request.getRequestId(), "Request forwarded for director approval.");
     }
 
     private void processDirectorApproval(PurchaseRequest request, User approver) {
@@ -126,6 +134,7 @@ public class ApprovalServiceImpl implements ApprovalService {
         request.setStatus("Approved");
         purchaseRequestRepository.save(request);
         requestHistoryService.logAction(request.getRequestId(), approver.getEmail(), "Approved", null);
+        notificationService.sendAppNotification(request.getCreatedByUser().getEmail(), request.getRequestId(), "Request approved.");
     }
 
     private void processRejection(PurchaseRequest request, User approver, String reason) {
@@ -134,6 +143,7 @@ public class ApprovalServiceImpl implements ApprovalService {
         request.setRejectReason(reason);
         purchaseRequestRepository.save(request);
         requestHistoryService.logAction(request.getRequestId(), approver.getEmail(), "Rejected", reason);
+        notificationService.sendAppNotification(request.getCreatedByUser().getEmail(), request.getRequestId(), "Request rejected.");
     }
 
     private void consumeBudgetForRequest(PurchaseRequest request) {

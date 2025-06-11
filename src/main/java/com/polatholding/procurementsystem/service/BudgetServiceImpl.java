@@ -6,6 +6,11 @@ import com.polatholding.procurementsystem.model.BudgetCode;
 import com.polatholding.procurementsystem.model.Department;
 import com.polatholding.procurementsystem.repository.BudgetCodeRepository;
 import com.polatholding.procurementsystem.repository.DepartmentRepository;
+import com.polatholding.procurementsystem.repository.UserRepository;
+import com.polatholding.procurementsystem.service.NotificationService;
+import com.polatholding.procurementsystem.model.User;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,10 +23,17 @@ public class BudgetServiceImpl implements BudgetService {
 
     private final BudgetCodeRepository budgetCodeRepository;
     private final DepartmentRepository departmentRepository;
+    private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
-    public BudgetServiceImpl(BudgetCodeRepository budgetCodeRepository, DepartmentRepository departmentRepository) {
+    public BudgetServiceImpl(BudgetCodeRepository budgetCodeRepository,
+                             DepartmentRepository departmentRepository,
+                             UserRepository userRepository,
+                             NotificationService notificationService) {
         this.budgetCodeRepository = budgetCodeRepository;
         this.departmentRepository = departmentRepository;
+        this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -49,6 +61,10 @@ public class BudgetServiceImpl implements BudgetService {
         BeanUtils.copyProperties(formDto, budgetCode, "budgetCodeId");
         budgetCode.setDepartment(department);
         budgetCodeRepository.save(budgetCode);
+        User user = getCurrentUser();
+        if (user != null) {
+            notificationService.sendAppNotification(user.getEmail(), 0, "Budget created: " + budgetCode.getCode());
+        }
     }
 
     @Override
@@ -86,6 +102,10 @@ public class BudgetServiceImpl implements BudgetService {
 
         // 4. Save the updated entity. Hibernate will generate an UPDATE statement.
         budgetCodeRepository.save(budgetCodeToUpdate);
+        User user = getCurrentUser();
+        if (user != null) {
+            notificationService.sendAppNotification(user.getEmail(), 0, "Budget updated: " + budgetCodeToUpdate.getCode());
+        }
     }
 
     @Override
@@ -103,5 +123,13 @@ public class BudgetServiceImpl implements BudgetService {
             dto.setDepartmentName(budgetCode.getDepartment().getDepartmentName());
         }
         return dto;
+    }
+
+    private User getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return null;
+        }
+        return userRepository.findByEmail(auth.getName()).orElse(null);
     }
 }
