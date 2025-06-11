@@ -1,6 +1,7 @@
 package com.polatholding.procurementsystem.dto;
 
 import com.polatholding.procurementsystem.model.PurchaseRequestItem;
+import com.polatholding.procurementsystem.model.File;
 import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,4 +20,5 @@ public class PurchaseRequestDetailDto {
     private BigDecimal grossAmount;
     private String currencyCode;
     private List<PurchaseRequestItem> items; // We can pass the entity here for simplicity
+    private List<File> files;
 }

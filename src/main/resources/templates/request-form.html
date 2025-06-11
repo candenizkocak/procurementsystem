@@ -29,7 +29,7 @@
                 <div th:if="${errorMessage}" class="alert-flash alert-danger-flash" th:text="${errorMessage}"></div>
 
                 <div th:with="actionUrl=${isEditMode} ? @{/requests/{id}/update(id=${requestId})} : @{/requests/save}">
-                    <form th:action="${actionUrl}" th:object="${requestForm}" method="post">
+                    <form th:action="${actionUrl}" th:object="${requestForm}" method="post" enctype="multipart/form-data">
                         <div class="form-section">
                             <h3>General Information</h3>
                             <div class="form-grid">
@@ -95,6 +95,11 @@
                             <div style="margin-top: 15px;">
                                 <button type="button" class="btn btn-success" onclick="addRow()">Add Item</button>
                             </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3>Attachments</h3>
+                            <input type="file" name="files" multiple />
                         </div>
 
                         <div class="form-actions">

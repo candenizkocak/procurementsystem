@@ -80,6 +80,16 @@
                         </tbody>
                     </table>
                 </div>
+
+                <div class="form-section">
+                    <h3>Attached Files</h3>
+                    <ul>
+                        <li th:each="file : ${request.files}">
+                            <a th:href="@{/requests/files/{id}/download(id=${file.fileId})}"
+                               th:text="${#strings.substring(file.filePath, file.filePath.lastIndexOf('/') + 1)}"></a>
+                        </li>
+                    </ul>
+                </div>
                 <div class="form-actions">
                     <a th:href="@{/dashboard}" class="btn btn-secondary" style="background-color: #6c757d; color: white;">Back to Dashboard</a>
                 </div>
