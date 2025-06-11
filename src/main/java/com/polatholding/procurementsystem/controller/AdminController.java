@@ -112,7 +112,8 @@ public class AdminController {
             model.addAttribute("departments", adminService.getAllDepartments());
             model.addAttribute("allRoles", adminService.getAllRoles());
             model.addAttribute("isEditMode", true);
-            model.addAttribute("pageErrorMessage", "An unexpected error occurred: " + e.getMessage());
+            String message = e.getMessage() != null ? e.getMessage() : "Please check the submitted data.";
+            model.addAttribute("pageErrorMessage", "An unexpected error occurred: " + message);
             return "admin-user-form";
         }
         return "redirect:/admin/users";

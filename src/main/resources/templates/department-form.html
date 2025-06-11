@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${isEditMode} ? 'Edit Department' : 'New Department'"></title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body style="overflow-y: hidden">
+<div class="app-container">
+    <aside class="sidebar" th:replace="~{fragments/sidebar :: sidebar}"></aside>
+    <main class="main-content">
+        <header class="header">
+            <h1 th:text="${isEditMode} ? 'Edit Department' : 'Create New Department'"></h1>
+            <div class="user-profile">
+                <span sec:authentication="principal.username">user@example.com</span>
+                <form th:action="@{/logout}" method="post"><button type="submit" class="btn-logout">Logout</button></form>
+            </div>
+        </header>
+        <div class="page-content">
+            <div class="form-container">
+                <form th:action="${isEditMode} ? @{/admin/departments/update/{id}(id=${departmentForm.departmentId})} : @{/admin/departments/save}" th:object="${departmentForm}" method="post">
+                    <input type="hidden" th:if="${isEditMode}" th:field="*{departmentId}" />
+                    <div class="form-section">
+                        <div class="form-group">
+                            <label for="departmentName">Department Name</label>
+                            <input type="text" id="departmentName" th:field="*{departmentName}" required>
+                            <small class="text-danger" th:if="${#fields.hasErrors('departmentName')}" th:errors="*{departmentName}"></small>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <a th:href="@{/admin/departments}" class="btn btn-secondary" style="background-color:#6c757d;color:white;">Cancel</a>
+                        <button type="submit" class="btn btn-primary" th:text="${isEditMode} ? 'Update Department' : 'Create Department'"></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>
