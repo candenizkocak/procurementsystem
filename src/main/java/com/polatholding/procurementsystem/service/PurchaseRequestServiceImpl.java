@@ -36,6 +36,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
     private static final String DIRECTOR_ROLE_NAME = "Director";
     private static final String PROCUREMENT_MANAGER_ROLE_NAME = "ProcurementManager";
     private static final String MANAGER_ROLE_NAME = "Manager";
+    private static final String FINANCE_OFFICER_ROLE_NAME = "Finance Officer";
     private static final BigDecimal HIGH_VALUE_THRESHOLD = new BigDecimal("1000000");
 
 
@@ -151,7 +152,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
 
         requestToUpdate.setStatus("Pending");
         Set<String> userRoles = requestToUpdate.getCreatedByUser().getRoles().stream().map(Role::getRoleName).collect(Collectors.toSet());
-        if (userRoles.contains(MANAGER_ROLE_NAME)) {
+        if (userRoles.contains(MANAGER_ROLE_NAME) || userRoles.contains(FINANCE_OFFICER_ROLE_NAME)) {
             requestToUpdate.setCurrentApprovalLevel(2);
         } else {
             requestToUpdate.setCurrentApprovalLevel(1);
@@ -211,7 +212,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
                 newRequest.setCurrentApprovalLevel(99);
                 isAutoApproved = true;
             }
-        } else if (userRoles.contains(MANAGER_ROLE_NAME)) {
+        } else if (userRoles.contains(MANAGER_ROLE_NAME) || userRoles.contains(FINANCE_OFFICER_ROLE_NAME)) {
             newRequest.setStatus("Pending");
             newRequest.setCurrentApprovalLevel(2);
         } else {
@@ -357,3 +358,4 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
                 .collect(Collectors.toList());
     }
 }
+
