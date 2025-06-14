@@ -19,6 +19,7 @@ public class PurchaseRequestDetailDto {
     private BigDecimal netAmount;
     private BigDecimal grossAmount;
     private String currencyCode;
+    private Integer daysSinceCreated;
     private List<PurchaseRequestItem> items; // We can pass the entity here for simplicity
     private List<File> files;
 }

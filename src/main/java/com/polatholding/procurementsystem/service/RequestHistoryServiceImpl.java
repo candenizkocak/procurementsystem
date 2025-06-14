@@ -16,11 +16,14 @@ public class RequestHistoryServiceImpl implements RequestHistoryService {
 
     private final RequestHistoryRepository requestHistoryRepository;
     private final UserRepository userRepository;
+    private final com.polatholding.procurementsystem.repository.DatabaseHelperRepository dbHelper;
 
     public RequestHistoryServiceImpl(RequestHistoryRepository requestHistoryRepository,
-                                     UserRepository userRepository) {
+                                     UserRepository userRepository,
+                                     com.polatholding.procurementsystem.repository.DatabaseHelperRepository dbHelper) {
         this.requestHistoryRepository = requestHistoryRepository;
         this.userRepository = userRepository;
+        this.dbHelper = dbHelper;
     }
 
     @Override
@@ -28,13 +31,7 @@ public class RequestHistoryServiceImpl implements RequestHistoryService {
     public void logAction(int requestId, String userEmail, String action, String details) {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userEmail));
-        RequestHistory history = new RequestHistory();
-        history.setRequestId(requestId);
-        history.setUser(user);
-        history.setAction(action);
-        history.setDetails(details);
-        history.setEventDate(LocalDateTime.now());
-        requestHistoryRepository.save(history);
+        dbHelper.logHistoryAction(requestId, user.getUserId(), action, details);
     }
 
     @Override
