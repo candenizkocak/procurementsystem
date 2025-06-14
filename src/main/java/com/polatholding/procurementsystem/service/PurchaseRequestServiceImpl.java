@@ -277,17 +277,23 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         if (currentUser.getRoles().stream().anyMatch(role -> MANAGER_ROLE_NAME.equals(role.getRoleName()))) {
             managerQueue = dbHelper.getPendingApprovalsForManager(currentUser.getUserId());
         }
+
         Set<Integer> generalRoleIds = currentUser.getRoles().stream()
                 .filter(role -> Set.of(PROCUREMENT_MANAGER_ROLE_NAME, DIRECTOR_ROLE_NAME).contains(role.getRoleName()))
                 .map(Role::getRoleId)
                 .collect(Collectors.toSet());
-        List<RequestSummaryViewDto> roleQueue = new ArrayList<>();
+
+        List<PurchaseRequest> roleQueue = new ArrayList<>();
         if (!generalRoleIds.isEmpty()) {
-            roleQueue = generalRoleIds.stream()
-                    .flatMap(id -> dbHelper.getPendingApprovalsForManager(id).stream())
-                    .collect(Collectors.toList());
+            roleQueue = purchaseRequestRepository.findPendingApprovalsByRoleIds(generalRoleIds);
         }
-        return Stream.concat(managerQueue.stream(), roleQueue.stream()).distinct().map(this::mapSummaryToDto).collect(Collectors.toList());
+
+        Stream<PurchaseRequestDto> managerDtoStream = managerQueue.stream().map(this::mapSummaryToDto);
+        Stream<PurchaseRequestDto> roleDtoStream = roleQueue.stream().map(this::convertToDto);
+
+        return Stream.concat(managerDtoStream, roleDtoStream)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -298,23 +304,13 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
     @Override
     @Transactional(readOnly = true)
     public PurchaseRequestDetailDto getRequestDetailsById(Integer requestId) {
-        RequestSummaryViewDto summary = dbHelper.getRequestSummary(requestId);
-        if (summary == null) {
-            throw new RuntimeException("Purchase Request not found with ID: " + requestId);
-        }
-        PurchaseRequestDetailDto dto = new PurchaseRequestDetailDto();
-        dto.setRequestId(summary.getRequestId());
-        dto.setCreatorFullName(summary.getCreator());
-        dto.setDepartmentName(summary.getDepartmentName());
-        dto.setStatus(summary.getStatus());
-        dto.setRejectReason(summary.getRejectReason());
-        dto.setCreatedAt(summary.getCreatedAt());
-        dto.setNetAmount(summary.getNetAmount());
-        dto.setCurrencyCode(summary.getCurrencyCode());
-        dto.setGrossAmount(dbHelper.calculateGrossAmount(summary.getNetAmount()));
+        PurchaseRequest request = purchaseRequestRepository.findByIdWithAllDetails(requestId)
+                .orElseThrow(() -> new RuntimeException("Purchase Request not found with ID: " + requestId));
+
+        PurchaseRequestDetailDto dto = convertToDetailDto(request);
+        // Demonstrate UDF usage even though we already have the values
+        dto.setGrossAmount(dbHelper.calculateGrossAmount(dto.getNetAmount()));
         dto.setDaysSinceCreated(dbHelper.getDaysSinceRequest(requestId));
-        dto.setItems(null);
-        dto.setFiles(null);
         return dto;
     }
 
