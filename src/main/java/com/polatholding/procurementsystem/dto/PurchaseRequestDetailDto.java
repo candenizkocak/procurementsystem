@@ -19,6 +19,10 @@ public class PurchaseRequestDetailDto {
     private BigDecimal netAmount;
     private BigDecimal grossAmount;
     private String currencyCode;
+    private Integer daysSinceCreated;
+    private Integer itemCount;
+    private java.time.LocalDateTime lastApprovalDate;
+    private boolean highValue;
     private List<PurchaseRequestItem> items; // We can pass the entity here for simplicity
     private List<File> files;
 }

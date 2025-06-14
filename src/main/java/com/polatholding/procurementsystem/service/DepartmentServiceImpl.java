@@ -15,9 +15,12 @@ import java.util.stream.Collectors;
 public class DepartmentServiceImpl implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
+    private final com.polatholding.procurementsystem.repository.DatabaseHelperRepository dbHelper;
 
-    public DepartmentServiceImpl(DepartmentRepository departmentRepository) {
+    public DepartmentServiceImpl(DepartmentRepository departmentRepository,
+                                com.polatholding.procurementsystem.repository.DatabaseHelperRepository dbHelper) {
         this.departmentRepository = departmentRepository;
+        this.dbHelper = dbHelper;
     }
 
     @Override
@@ -59,6 +62,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     private DepartmentDto convertToDto(Department department) {
         DepartmentDto dto = new DepartmentDto();
         BeanUtils.copyProperties(department, dto);
+        dto.setRequestCount(dbHelper.getDepartmentRequestCount(department.getDepartmentId()));
         return dto;
     }
 }

@@ -25,6 +25,7 @@ public class AdminServiceImpl implements AdminService {
     private final DepartmentRepository departmentRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final com.polatholding.procurementsystem.repository.DatabaseHelperRepository dbHelper;
 
     // Role Names - Ensure these EXACTLY match RoleName in your Roles TABLE
     public static final String AUDITOR_ROLE_NAME = "Auditor";
@@ -44,11 +45,13 @@ public class AdminServiceImpl implements AdminService {
     public AdminServiceImpl(UserRepository userRepository,
                             DepartmentRepository departmentRepository,
                             RoleRepository roleRepository,
-                            PasswordEncoder passwordEncoder) {
+                            PasswordEncoder passwordEncoder,
+                            com.polatholding.procurementsystem.repository.DatabaseHelperRepository dbHelper) {
         this.userRepository = userRepository;
         this.departmentRepository = departmentRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.dbHelper = dbHelper;
     }
 
     @Override
@@ -79,6 +82,7 @@ public class AdminServiceImpl implements AdminService {
         }
         dto.setCreatedAt(user.getCreatedAt());
         dto.setFormerEmployee(user.isFormerEmployee());
+        dto.setTotalRequestValue(dbHelper.totalRequestValueForUser(user.getUserId()));
         return dto;
     }
 
@@ -198,8 +202,13 @@ public class AdminServiceImpl implements AdminService {
         newUser.setCreatedAt(LocalDateTime.now());
         newUser.setFormerEmployee(userFormDto.isFormerEmployee());
 
-        userRepository.save(newUser);
-        System.out.println("DEBUG createUser: User saved successfully. Email: " + newUser.getEmail());
+        Integer deptId = finalDepartmentToAssign != null ? finalDepartmentToAssign.getDepartmentId() : null;
+        dbHelper.addUser(newUser.getFirstName(), newUser.getLastName(), newUser.getEmail(), newUser.getPasswordHash(), deptId);
+
+        User created = userRepository.findByEmail(newUser.getEmail())
+                .orElseThrow(() -> new IllegalStateException("User creation failed"));
+        dbHelper.assignUserRole(created.getUserId(), finalRoleToAssign.getRoleName());
+        System.out.println("DEBUG createUser: User saved via stored procedure. Email: " + newUser.getEmail());
     }
 
     @Override

@@ -14,4 +14,5 @@ public class UserDto {
     private Set<String> roles; // Store role names as Strings
     private LocalDateTime createdAt;
     private boolean formerEmployee;
+    private java.math.BigDecimal totalRequestValue;
 }

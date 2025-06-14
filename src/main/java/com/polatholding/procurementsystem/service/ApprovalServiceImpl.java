@@ -22,6 +22,7 @@ public class ApprovalServiceImpl implements ApprovalService {
     private final ApprovalStepRepository approvalStepRepository;
     private final BudgetCodeRepository budgetCodeRepository;
     private final RequestHistoryService requestHistoryService;
+    private final com.polatholding.procurementsystem.repository.DatabaseHelperRepository dbHelper;
 
     private static final BigDecimal HIGH_VALUE_THRESHOLD = new BigDecimal("1000000");
     private static final String DIRECTOR_ROLE_NAME = "Director";
@@ -33,7 +34,8 @@ public class ApprovalServiceImpl implements ApprovalService {
                                ExchangeRateRepository exchangeRateRepository,
                                ApprovalStepRepository approvalStepRepository,
                                BudgetCodeRepository budgetCodeRepository,
-                               RequestHistoryService requestHistoryService) {
+                               RequestHistoryService requestHistoryService,
+                               com.polatholding.procurementsystem.repository.DatabaseHelperRepository dbHelper) {
         this.purchaseRequestRepository = purchaseRequestRepository;
         this.userRepository = userRepository;
         this.approvalRepository = approvalRepository;
@@ -41,6 +43,7 @@ public class ApprovalServiceImpl implements ApprovalService {
         this.approvalStepRepository = approvalStepRepository;
         this.budgetCodeRepository = budgetCodeRepository;
         this.requestHistoryService = requestHistoryService;
+        this.dbHelper = dbHelper;
     }
 
     @Override
@@ -84,6 +87,7 @@ public class ApprovalServiceImpl implements ApprovalService {
         request.setRejectReason(comments);
 
         purchaseRequestRepository.save(request);
+        dbHelper.updateRequestStatus(request.getRequestId(), "Returned for Edit");
         requestHistoryService.logAction(requestId, userEmail, "Returned for Edit", comments);
     }
 
@@ -103,13 +107,14 @@ public class ApprovalServiceImpl implements ApprovalService {
             throw new AccessDeniedException("User does not have the Procurement Manager role.");
         }
         logApprovalAction(request, approver, "Approved", null);
-        BigDecimal valueInTRY = calculateRequestValueInTRY(request);
-        if (valueInTRY.compareTo(HIGH_VALUE_THRESHOLD) > 0) {
+        boolean highValue = dbHelper.isHighValueTRY(request.getRequestId());
+        if (highValue) {
             request.setCurrentApprovalLevel(3);
         } else {
             consumeBudgetForRequest(request);
             request.setStatus("Approved");
             purchaseRequestRepository.save(request);
+            dbHelper.updateRequestStatus(request.getRequestId(), "Approved");
             requestHistoryService.logAction(request.getRequestId(), approver.getEmail(), "Approved", null);
             return;
         }
@@ -125,6 +130,7 @@ public class ApprovalServiceImpl implements ApprovalService {
         consumeBudgetForRequest(request);
         request.setStatus("Approved");
         purchaseRequestRepository.save(request);
+        dbHelper.updateRequestStatus(request.getRequestId(), "Approved");
         requestHistoryService.logAction(request.getRequestId(), approver.getEmail(), "Approved", null);
     }
 
@@ -133,6 +139,7 @@ public class ApprovalServiceImpl implements ApprovalService {
         request.setStatus("Rejected");
         request.setRejectReason(reason);
         purchaseRequestRepository.save(request);
+        dbHelper.updateRequestStatus(request.getRequestId(), "Rejected");
         requestHistoryService.logAction(request.getRequestId(), approver.getEmail(), "Rejected", reason);
     }
 
@@ -157,6 +164,8 @@ public class ApprovalServiceImpl implements ApprovalService {
     private void logApprovalAction(PurchaseRequest request, User approver, String status, String reason) {
         ApprovalStep currentStep = approvalStepRepository.findByStepOrder(request.getCurrentApprovalLevel())
                 .orElseThrow(() -> new IllegalStateException("Cannot log approval for a non-existent approval step level: " + request.getCurrentApprovalLevel()));
+        // Determine the role name for the next level (for demonstration)
+        dbHelper.getApproverRoleForLevel(currentStep.getStepOrder() + 1);
 
         Approval approvalLog = new Approval();
         approvalLog.setPurchaseRequest(request);
