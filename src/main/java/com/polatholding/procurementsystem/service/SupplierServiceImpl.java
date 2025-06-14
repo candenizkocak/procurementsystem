@@ -16,9 +16,12 @@ import java.util.stream.Stream;
 public class SupplierServiceImpl implements SupplierService {
 
     private final SupplierRepository supplierRepository;
+    private final com.polatholding.procurementsystem.repository.DatabaseHelperRepository dbHelper;
 
-    public SupplierServiceImpl(SupplierRepository supplierRepository) {
+    public SupplierServiceImpl(SupplierRepository supplierRepository,
+                               com.polatholding.procurementsystem.repository.DatabaseHelperRepository dbHelper) {
         this.supplierRepository = supplierRepository;
+        this.dbHelper = dbHelper;
     }
 
     @Override
@@ -27,7 +30,7 @@ public class SupplierServiceImpl implements SupplierService {
         Supplier newSupplier = new Supplier();
         BeanUtils.copyProperties(formDto, newSupplier);
         newSupplier.setStatus("Pending");
-        supplierRepository.save(newSupplier);
+        dbHelper.addSupplier(newSupplier.getSupplierName(), newSupplier.getContactPerson(), newSupplier.getEmail());
     }
 
     @Override

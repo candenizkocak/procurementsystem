@@ -1,6 +1,7 @@
 package com.polatholding.procurementsystem.service;
 
 import com.polatholding.procurementsystem.dto.*;
+import com.polatholding.procurementsystem.dto.RequestSummaryViewDto;
 import com.polatholding.procurementsystem.exception.InsufficientBudgetException;
 import com.polatholding.procurementsystem.model.*;
 import com.polatholding.procurementsystem.repository.*;
@@ -32,6 +33,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
     private final ExchangeRateRepository exchangeRateRepository;
     private final RequestHistoryService requestHistoryService;
     private final FileService fileService;
+    private final com.polatholding.procurementsystem.repository.DatabaseHelperRepository dbHelper;
 
     private static final String DIRECTOR_ROLE_NAME = "Director";
     private static final String PROCUREMENT_MANAGER_ROLE_NAME = "ProcurementManager";
@@ -48,7 +50,8 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
                                       UnitRepository unitRepository,
                                       ExchangeRateRepository exchangeRateRepository,
                                       RequestHistoryService requestHistoryService,
-                                      FileService fileService) {
+                                      FileService fileService,
+                                      com.polatholding.procurementsystem.repository.DatabaseHelperRepository dbHelper) {
         this.purchaseRequestRepository = purchaseRequestRepository;
         this.userRepository = userRepository;
         this.budgetCodeRepository = budgetCodeRepository;
@@ -58,6 +61,7 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         this.exchangeRateRepository = exchangeRateRepository;
         this.requestHistoryService = requestHistoryService;
         this.fileService = fileService;
+        this.dbHelper = dbHelper;
     }
 
     @Override
@@ -269,19 +273,21 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
     @Transactional(readOnly = true)
     public List<PurchaseRequestDto> getPendingApprovalsForUser(String userEmail) {
         User currentUser = userRepository.findByEmail(userEmail).orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + userEmail));
-        List<PurchaseRequest> managerQueue = new ArrayList<>();
+        List<RequestSummaryViewDto> managerQueue = new ArrayList<>();
         if (currentUser.getRoles().stream().anyMatch(role -> MANAGER_ROLE_NAME.equals(role.getRoleName()))) {
-            managerQueue = purchaseRequestRepository.findPendingDepartmentManagerApprovals(currentUser.getUserId());
+            managerQueue = dbHelper.getPendingApprovalsForManager(currentUser.getUserId());
         }
         Set<Integer> generalRoleIds = currentUser.getRoles().stream()
                 .filter(role -> Set.of(PROCUREMENT_MANAGER_ROLE_NAME, DIRECTOR_ROLE_NAME).contains(role.getRoleName()))
                 .map(Role::getRoleId)
                 .collect(Collectors.toSet());
-        List<PurchaseRequest> roleQueue = new ArrayList<>();
+        List<RequestSummaryViewDto> roleQueue = new ArrayList<>();
         if (!generalRoleIds.isEmpty()) {
-            roleQueue = purchaseRequestRepository.findPendingApprovalsByRoleIds(generalRoleIds);
+            roleQueue = generalRoleIds.stream()
+                    .flatMap(id -> dbHelper.getPendingApprovalsForManager(id).stream())
+                    .collect(Collectors.toList());
         }
-        return Stream.concat(managerQueue.stream(), roleQueue.stream()).distinct().map(this::convertToDto).collect(Collectors.toList());
+        return Stream.concat(managerQueue.stream(), roleQueue.stream()).distinct().map(this::mapSummaryToDto).collect(Collectors.toList());
     }
 
     @Override
@@ -292,9 +298,24 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
     @Override
     @Transactional(readOnly = true)
     public PurchaseRequestDetailDto getRequestDetailsById(Integer requestId) {
-        PurchaseRequest request = purchaseRequestRepository.findByIdWithAllDetails(requestId)
-                .orElseThrow(() -> new RuntimeException("Purchase Request not found with ID: " + requestId));
-        return convertToDetailDto(request);
+        RequestSummaryViewDto summary = dbHelper.getRequestSummary(requestId);
+        if (summary == null) {
+            throw new RuntimeException("Purchase Request not found with ID: " + requestId);
+        }
+        PurchaseRequestDetailDto dto = new PurchaseRequestDetailDto();
+        dto.setRequestId(summary.getRequestId());
+        dto.setCreatorFullName(summary.getCreator());
+        dto.setDepartmentName(summary.getDepartmentName());
+        dto.setStatus(summary.getStatus());
+        dto.setRejectReason(summary.getRejectReason());
+        dto.setCreatedAt(summary.getCreatedAt());
+        dto.setNetAmount(summary.getNetAmount());
+        dto.setCurrencyCode(summary.getCurrencyCode());
+        dto.setGrossAmount(dbHelper.calculateGrossAmount(summary.getNetAmount()));
+        dto.setDaysSinceCreated(dbHelper.getDaysSinceRequest(requestId));
+        dto.setItems(null);
+        dto.setFiles(null);
+        return dto;
     }
 
     private PurchaseRequestDto convertToDto(PurchaseRequest request) {
@@ -327,24 +348,34 @@ public class PurchaseRequestServiceImpl implements PurchaseRequestService {
         dto.setFiles(request.getFiles());
         return dto;
     }
+
+    private PurchaseRequestDto mapSummaryToDto(RequestSummaryViewDto summary) {
+        PurchaseRequestDto dto = new PurchaseRequestDto();
+        dto.setRequestId(summary.getRequestId());
+        dto.setCreatorFullName(summary.getCreator());
+        dto.setDepartmentName(summary.getDepartmentName());
+        dto.setStatus(summary.getStatus());
+        dto.setNetAmount(summary.getNetAmount());
+        dto.setCurrencyCode(summary.getCurrencyCode());
+        dto.setCreatedAt(summary.getCreatedAt());
+        dto.setRejectReason(summary.getRejectReason());
+        return dto;
+    }
     @Override
     @Transactional(readOnly = true)
     public List<PurchaseRequestDto> searchUserRequests(String userEmail, String searchTerm) {
-        // We get all requests found by the search term first.
-        List<PurchaseRequest> allFoundRequests = purchaseRequestRepository.searchByItemFreetext(searchTerm);
+        List<RequestSummaryViewDto> allFoundRequests = dbHelper.searchRequests(searchTerm);
 
         // Then, we filter them based on the user's permissions in Java.
         User user = userRepository.findByEmail(userEmail).orElseThrow(() -> new UsernameNotFoundException("User not found: " + userEmail));
         boolean isPrivileged = user.getRoles().stream().anyMatch(role -> Set.of("Manager", "ProcurementManager", "Director", "Admin", "Finance", "Auditor").contains(role.getRoleName()));
 
         if (isPrivileged) {
-            // Privileged users can see all search results.
-            return allFoundRequests.stream().map(this::convertToDto).collect(Collectors.toList());
+            return allFoundRequests.stream().map(this::mapSummaryToDto).collect(Collectors.toList());
         } else {
-            // Standard users only see results they created.
             return allFoundRequests.stream()
-                    .filter(req -> req.getCreatedByUser().getUserId().equals(user.getUserId()))
-                    .map(this::convertToDto)
+                    .filter(req -> req.getCreator().equalsIgnoreCase(user.getFirstName() + " " + user.getLastName()))
+                    .map(this::mapSummaryToDto)
                     .collect(Collectors.toList());
         }
     }
