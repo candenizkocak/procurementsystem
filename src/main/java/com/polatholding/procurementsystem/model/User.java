@@ -4,9 +4,12 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -14,6 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Entity
 @Table(name = "Users")
+@EqualsAndHashCode(exclude = {"department", "managedDepartments"})
 public class User {
 
     @Id
@@ -50,4 +54,7 @@ public class User {
 
     @Column(name = "FormerEmployee", nullable = false)
     private boolean formerEmployee = false;
+
+    @OneToMany(mappedBy = "managerUser", fetch = FetchType.LAZY)
+    private List<Department> managedDepartments = new ArrayList<>(); // Initialize to avoid NPE
 }

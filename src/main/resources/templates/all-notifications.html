@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Notifications - Procurement System</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="d-flex">
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <!-- Main content -->
+    <div class="main-content flex-grow-1 p-4">
+        <div class="container">
+            <h2 class="mb-4">Notifications</h2>
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">All Notifications</h5>
+                    <button id="markAllAsReadBtn" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-check-double"></i> Mark All as Read
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="notificationsContainer">
+                        <ul id="allNotificationsList" class="list-group">
+                            <li class="list-group-item text-center">Loading notifications...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const notificationsList = document.getElementById('allNotificationsList');
+            const markAllAsReadBtn = document.getElementById('markAllAsReadBtn');
+            const API_BASE_URL = '/api/notifications';
+
+            // Fetch all notifications
+            async function fetchAllNotifications() {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/all`);
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch notifications: ${response.status}`);
+                    }
+                    const notifications = await response.json();
+                    renderNotifications(notifications);
+                } catch (error) {
+                    console.error('Error fetching notifications:', error);
+                    notificationsList.innerHTML = '<li class="list-group-item text-center text-danger">Error loading notifications. Please try again later.</li>';
+                }
+            }
+
+            // Render notifications in the list
+            function renderNotifications(notifications) {
+                if (notifications.length === 0) {
+                    notificationsList.innerHTML = '<li class="list-group-item text-center">No notifications to display.</li>';
+                    return;
+                }
+
+                notificationsList.innerHTML = '';
+                notifications.forEach(notification => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item notification-item';
+
+                    // Fixed property check: Proper handling of isRead property
+                    const isNotificationRead = notification.read === true || notification.isRead === true;
+                    if (!isNotificationRead) {
+                        li.classList.add('unread');
+                    }
+
+                    const container = document.createElement('div');
+                    container.className = 'd-flex justify-content-between align-items-start';
+
+                    const contentDiv = document.createElement('div');
+                    contentDiv.className = 'notification-content';
+
+                    const message = document.createElement('div');
+                    message.className = 'notification-message';
+                    message.textContent = notification.message;
+
+                    const timeSpan = document.createElement('small');
+                    timeSpan.className = 'text-muted';
+                    timeSpan.textContent = notification.sentDateFormatted;
+
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'notification-actions';
+
+                    // Only show Mark as Read button if notification is unread
+                    if (!isNotificationRead) {
+                        const markReadBtn = document.createElement('button');
+                        markReadBtn.className = 'btn btn-sm btn-link mark-read-btn';
+                        markReadBtn.setAttribute('data-notification-id', notification.notificationId);
+                        markReadBtn.innerHTML = '<i class="fas fa-check"></i> Mark as Read';
+                        markReadBtn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            markAsRead(notification.notificationId, li);
+                        });
+                        actionsDiv.appendChild(markReadBtn);
+                    }
+
+                    const viewBtn = document.createElement('a');
+                    viewBtn.href = notification.link || '#';
+                    viewBtn.className = 'btn btn-sm btn-outline-primary ms-2';
+                    viewBtn.innerHTML = '<i class="fas fa-eye"></i> View';
+
+                    actionsDiv.appendChild(viewBtn);
+                    contentDiv.appendChild(message);
+                    contentDiv.appendChild(timeSpan);
+
+                    container.appendChild(contentDiv);
+                    container.appendChild(actionsDiv);
+                    li.appendChild(container);
+
+                    notificationsList.appendChild(li);
+                });
+            }
+
+            // Mark notification as read
+            async function markAsRead(notificationId, listItem) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/${notificationId}/read`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Failed to mark notification as read: ${response.status}`);
+                    }
+
+                    // Update UI to show notification as read
+                    listItem.classList.remove('unread');
+
+                    // Remove the "Mark as Read" button
+                    const markReadBtn = listItem.querySelector('.mark-read-btn');
+                    if (markReadBtn) {
+                        markReadBtn.remove();
+                    }
+
+                    console.log('Successfully marked notification as read:', notificationId);
+
+                    // Update unread count in the notification badge
+                    updateUnreadCount();
+
+                } catch (error) {
+                    console.error('Error marking notification as read:', error);
+                    alert('Failed to mark notification as read. Please try again.');
+                }
+            }
+
+            // Mark all notifications as read
+            async function markAllAsRead() {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/read-all`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Failed to mark all notifications as read: ${response.status}`);
+                    }
+
+                    console.log('Successfully marked all notifications as read');
+
+                    // Update all items in the UI immediately
+                    const unreadItems = document.querySelectorAll('.notification-item.unread');
+                    unreadItems.forEach(item => {
+                        // Remove unread class
+                        item.classList.remove('unread');
+
+                        // Remove the mark as read button
+                        const markReadBtn = item.querySelector('.mark-read-btn');
+                        if (markReadBtn) {
+                            markReadBtn.remove();
+                        }
+                    });
+
+                    // Update unread count in the notification badge
+                    updateUnreadCount();
+
+                } catch (error) {
+                    console.error('Error marking all notifications as read:', error);
+                    alert('Failed to mark all notifications as read. Please try again.');
+                }
+            }
+
+            // Update unread count in sidebar if you have that feature
+            async function updateUnreadCount() {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/unread-count`);
+                    if (response.ok) {
+                        const count = await response.json();
+                        const badge = document.getElementById('notificationCountBadge');
+                        if (badge) {
+                            if (count > 0) {
+                                badge.textContent = count > 9 ? '9+' : count;
+                                badge.style.display = 'inline-block';
+                            } else {
+                                badge.style.display = 'none';
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error updating unread count:', error);
+                }
+            }
+
+            // Event listener for "Mark All as Read" button
+            if (markAllAsReadBtn) {
+                markAllAsReadBtn.addEventListener('click', markAllAsRead);
+            }
+
+            // Load notifications when page loads
+            fetchAllNotifications();
+        });
+    </script>
+
+    <style>
+        .notification-item {
+            transition: background-color 0.3s;
+            border-left: 3px solid transparent;
+        }
+
+        .notification-item.unread {
+            background-color: #f8f9fa;
+            border-left: 3px solid #0d6efd;
+        }
+
+        .notification-message {
+            margin-bottom: 5px;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-actions {
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</body>
+</html>

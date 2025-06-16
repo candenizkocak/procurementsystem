@@ -38,7 +38,7 @@ public class AdminServiceImpl implements AdminService {
     public static final String FINANCE_DEPARTMENT_NAME = "Finance";
 
     // Other Role Names
-    private static final String MANAGER_ROLE_NAME = "Manager"; // Base Manager role
+    static final String MANAGER_ROLE_NAME = "Manager"; // Base Manager role
     public static final String PROCUREMENT_MANAGER_ROLE_NAME = "ProcurementManager"; // Actual target role if Manager in Procurement Dept.
 
 

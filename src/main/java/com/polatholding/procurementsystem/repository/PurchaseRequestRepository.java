@@ -36,6 +36,15 @@ public interface PurchaseRequestRepository extends JpaRepository<PurchaseRequest
             "WHERE pr.status = 'Pending' AND pr.currentApprovalLevel = 1 AND d.managerUserId = :managerId")
     List<PurchaseRequest> findPendingDepartmentManagerApprovals(@Param("managerId") Integer managerId);
 
+    //BELOW IS THE NEW findPendingDepartmentManagerApprovals
+    @Query("SELECT pr FROM PurchaseRequest pr " +
+            "JOIN FETCH pr.createdByUser " +
+            "JOIN FETCH pr.department d " +
+            "JOIN FETCH pr.currency " +
+            "WHERE pr.status = 'Pending' AND pr.currentApprovalLevel = 1 AND d.departmentId = :departmentId AND d.managerUser.userId = :managerId " +
+            "ORDER BY pr.createdAt ASC")
+    List<PurchaseRequest> findPendingDepartmentManagerApprovals(@Param("managerId") Integer managerId, @Param("departmentId") Integer departmentId);
+
     @Query("SELECT pr FROM PurchaseRequest pr " +
             "JOIN ApprovalStep a ON pr.currentApprovalLevel = a.stepOrder " +
             "JOIN FETCH pr.createdByUser " +

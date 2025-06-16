@@ -16,9 +16,35 @@
         <!-- Header -->
         <header class="header">
             <h1>Budget Status Report</h1>
-            <div class="user-profile">
-                <span sec:authentication="principal.username">user@example.com</span>
-                <form th:action="@{/logout}" method="post"><button type="submit" class="btn-logout">Logout</button></form>
+
+            <!-- Spacer to push user profile and notifications to the right -->
+            <div style="margin-left: auto; display: flex; align-items: center;">
+                <!-- NOTIFICATION BELL AREA - START -->
+                <div class="notification-area">
+                    <button id="notificationBell" class="notification-bell-button" aria-label="Notifications">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                        <span id="notificationCountBadge" class="notification-badge" style="display:none;">0</span>
+                    </button>
+                    <div id="notificationDropdown" class="notification-dropdown">
+                        <div class="notification-dropdown-header">
+                            <span>Notifications</span>
+                            <button id="markAllAsReadBtn" class="mark-all-read-btn">Mark all as read</button>
+                        </div>
+                        <ul id="notificationList" class="notification-list">
+                            <!-- Notifications will be loaded here by JS -->
+                            <li class="no-notifications" style="display:none; text-align:center; padding: 20px; color: #777;">No new notifications.</li>
+                        </ul>
+                        <div class="notification-dropdown-footer">
+                            <a th:href="@{/notifications/all}">View all notifications</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- NOTIFICATION BELL AREA - END -->
+
+                <div class="user-profile">
+                    <span sec:authentication="principal.username">user@example.com</span>
+                    <form th:action="@{/logout}" method="post"><button type="submit" class="btn-logout">Logout</button></form>
+                </div>
             </div>
         </header>
 
@@ -72,5 +98,6 @@
         });
     });
 </script>
+<script th:src="@{/js/notifications.js}"></script>
 </body>
 </html>

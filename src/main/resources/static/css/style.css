@@ -676,3 +676,152 @@ body {
     border-radius: 0 5px 5px 0;
     font-size: 1rem;
 }
+.notification-area {
+    position: relative;
+    margin-right: 20px; /* Space before user profile */
+}
+
+.notification-bell-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    position: relative;
+    color: #555; /* Bell icon color */
+}
+.notification-bell-button:hover {
+    color: var(--polat-accent-blue);
+}
+
+.notification-bell-button svg {
+    width: 24px;
+    height: 24px;
+}
+
+.notification-badge {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    background-color: #dc3545; /* Red */
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    line-height: 1;
+    min-width: 18px; /* Ensure circle shape for single digit */
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.notification-dropdown {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: 100%; /* Position below the bell */
+    right: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    width: 350px;
+    max-height: 400px; /* Limit height and make scrollable */
+    z-index: 1050; /* Ensure it's above other content */
+}
+
+.notification-dropdown.show {
+    display: block;
+}
+
+.notification-dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    font-weight: bold;
+}
+.notification-dropdown-header span {
+    font-size: 1rem;
+    color: #333;
+}
+
+.mark-all-read-btn {
+    font-size: 0.8rem;
+    color: var(--polat-accent-blue);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+}
+.mark-all-read-btn:hover {
+    text-decoration: underline;
+}
+
+
+.notification-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 280px; /* Adjust based on overall dropdown height */
+    overflow-y: auto;
+}
+
+.notification-item {
+    border-bottom: 1px solid #f0f0f0;
+}
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item a {
+    display: block;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: #333;
+    transition: background-color 0.2s;
+}
+.notification-item a:hover {
+    background-color: #f8f9fa;
+}
+
+.notification-item.unread a {
+    background-color: #e9f5ff; /* Light blue for unread */
+    font-weight: 500; /* Slightly bolder for unread */
+}
+.notification-item.unread a:hover {
+    background-color: #d4ebfc;
+}
+
+
+.notification-message {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 4px;
+    white-space: normal; /* Allow text wrapping */
+}
+
+.notification-time {
+    font-size: 0.75rem;
+    color: #777;
+}
+
+.notification-dropdown-footer {
+    padding: 10px 15px;
+    text-align: center;
+    border-top: 1px solid #eee;
+}
+.notification-dropdown-footer a {
+    color: var(--polat-accent-blue);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+.notification-dropdown-footer a:hover {
+    text-decoration: underline;
+}
+
+.no-notifications {
+    padding: 20px;
+    text-align: center;
+    color: #999;
+    font-size: 0.9rem;
+}
