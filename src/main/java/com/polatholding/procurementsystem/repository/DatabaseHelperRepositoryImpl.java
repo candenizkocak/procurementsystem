@@ -15,6 +15,10 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import java.sql.Date;
+import java.time.LocalDate;
+
+
 @Repository
 public class DatabaseHelperRepositoryImpl implements DatabaseHelperRepository {
 
@@ -40,8 +44,9 @@ public class DatabaseHelperRepositoryImpl implements DatabaseHelperRepository {
     }
 
     @Override
-    public void updateExchangeRate(String currencyCode, BigDecimal rate) {
-        jdbcTemplate.update("EXEC sp_UpdateExchangeRate ?,?", currencyCode, rate);
+    public void updateExchangeRate(String currencyCode, BigDecimal rate, LocalDate date) { // Added LocalDate date
+        // Convert LocalDate to java.sql.Date for the JDBC call
+        jdbcTemplate.update("EXEC sp_UpdateExchangeRate ?, ?, ?", currencyCode, rate, java.sql.Date.valueOf(date));
     }
 
     @Override

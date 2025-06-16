@@ -41,7 +41,7 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
     }
 
     @Override
-    @Scheduled(cron = "0 0 10 * * ?")
+    @Scheduled(cron = "0 26 14 * * ?")
     @Transactional
     public void updateDailyExchangeRates() {
         log.info("Starting daily exchange rate update");
@@ -56,36 +56,45 @@ public class ExchangeRateServiceImpl implements ExchangeRateService {
             log.warn("Exchange rate API returned no data");
             return;
         }
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(); // This is the date we want to use
 
-        // Get USD and EUR rates from API (these are TRY against USD/EUR)
-        BigDecimal usdRate = response.getRates().get("USD");
-        BigDecimal eurRate = response.getRates().get("EUR");
+        BigDecimal usdRateFromApi = response.getRates().get("USD"); // e.g., TRY per 1 USD
+        BigDecimal eurRateFromApi = response.getRates().get("EUR"); // e.g., TRY per 1 EUR
 
-        // Invert the rates to get USD/EUR against TRY
-        BigDecimal usdAgainstTry = (usdRate != null && usdRate.compareTo(BigDecimal.ZERO) != 0)
-            ? BigDecimal.ONE.divide(usdRate, 6, BigDecimal.ROUND_HALF_UP)
-            : null;
-        BigDecimal eurAgainstTry = (eurRate != null && eurRate.compareTo(BigDecimal.ZERO) != 0)
-            ? BigDecimal.ONE.divide(eurRate, 6, BigDecimal.ROUND_HALF_UP)
-            : null;
+        // Assuming API gives rates as X / TRY (e.g. USD/TRY, EUR/TRY)
+        // and we want to store them as units of TRY for 1 unit of foreign currency.
+        // The API gives: 1 TRY = X USD. So, 1 USD = 1/X TRY.
+        // Or if the API gives: 1 USD = X TRY, then that's what we store.
+        // Your current code inverts:
+        // BigDecimal usdAgainstTry = (usdRate != null && usdRate.compareTo(BigDecimal.ZERO) != 0)
+        //    ? BigDecimal.ONE.divide(usdRate, 6, BigDecimal.ROUND_HALF_UP)
+        //    : null;
+        // This implies the API gives rates like 1 TRY = 0.03 USD, so 1 USD = 1/0.03 TRY.
+        // Let's stick to your existing inversion logic.
 
-        // Save the inverted rates
-        saveRate("USD", usdAgainstTry, today);
-        saveRate("EUR", eurAgainstTry, today);
-        saveRate("TRY", BigDecimal.ONE, today);
+        BigDecimal usdRateInTry = (usdRateFromApi != null && usdRateFromApi.compareTo(BigDecimal.ZERO) != 0)
+                ? BigDecimal.ONE.divide(usdRateFromApi, 6, BigDecimal.ROUND_HALF_UP)
+                : null;
+        BigDecimal eurRateInTry = (eurRateFromApi != null && eurRateFromApi.compareTo(BigDecimal.ZERO) != 0)
+                ? BigDecimal.ONE.divide(eurRateFromApi, 6, BigDecimal.ROUND_HALF_UP)
+                : null;
 
-        log.info("Finished updating rates: USD/TRY={}, EUR/TRY={}", usdAgainstTry, eurAgainstTry);
+        saveRate("USD", usdRateInTry, today);
+        saveRate("EUR", eurRateInTry, today);
+        saveRate("TRY", BigDecimal.ONE, today); // TRY to TRY is always 1
+
+        log.info("Finished updating rates for {}: USD/TRY={}, EUR/TRY={}", today, usdRateInTry, eurRateInTry);
     }
 
-    private void saveRate(String currencyCode, BigDecimal rate, LocalDate date) {
+    private void saveRate(String currencyCode, BigDecimal rate, LocalDate date) { // 'date' is now used
         if (rate == null) {
             log.warn("No rate value for currency {} on {}", currencyCode, date);
             return;
         }
         currencyRepository.findByCurrencyCode(currencyCode).ifPresentOrElse(currency -> {
-            dbHelper.updateExchangeRate(currencyCode, rate);
-            log.debug("Saved/updated exchange rate for {} using procedure", currencyCode);
+            // Pass the date to the dbHelper method
+            dbHelper.updateExchangeRate(currencyCode, rate, date);
+            log.debug("Saved/updated exchange rate for {} on {} using procedure", currencyCode, date);
         }, () -> log.warn("Currency not found for code {}", currencyCode));
     }
 }

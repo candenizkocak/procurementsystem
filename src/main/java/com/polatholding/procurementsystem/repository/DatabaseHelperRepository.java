@@ -4,16 +4,16 @@ import com.polatholding.procurementsystem.dto.RequestSummaryViewDto;
 import com.polatholding.procurementsystem.dto.UserWithRoleViewDto;
 import com.polatholding.procurementsystem.dto.ApprovalViewDto;
 import com.polatholding.procurementsystem.dto.DepartmentBudgetViewDto;
-
-
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
+
 
 public interface DatabaseHelperRepository {
     void addUser(String firstName, String lastName, String email, String passwordHash, Integer departmentId);
     void assignUserRole(Integer userId, String roleName);
     void addSupplier(String supplierName, String contactPerson, String email);
-    void updateExchangeRate(String currencyCode, BigDecimal rate);
+    void updateExchangeRate(String currencyCode, BigDecimal rate, LocalDate date);
     void logHistoryAction(Integer requestId, Integer userId, String action, String details);
     List<RequestSummaryViewDto> searchRequests(String searchTerm);
     List<RequestSummaryViewDto> getPendingApprovalsForManager(Integer managerId);
