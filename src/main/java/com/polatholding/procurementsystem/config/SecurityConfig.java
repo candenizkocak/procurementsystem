@@ -42,6 +42,7 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()
                 )
+                .csrf(csrf -> csrf.disable())
                 // --- THIS IS THE FIX ---
                 // Add custom exception handling for access denied errors.
                 .exceptionHandling(exceptions -> exceptions
