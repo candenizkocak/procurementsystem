@@ -2,6 +2,7 @@ package com.polatholding.procurementsystem.model;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -19,6 +20,7 @@ import java.util.Set;
 @Entity
 @Table(name = "Users")
 @EqualsAndHashCode(exclude = {"department", "managedDepartments"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {
 
     @Id
