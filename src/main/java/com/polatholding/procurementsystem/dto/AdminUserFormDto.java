@@ -1,5 +1,6 @@
 package com.polatholding.procurementsystem.dto;
 
+import com.polatholding.procurementsystem.validation.OnCreate;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -9,7 +10,7 @@ import lombok.Data;
 @Data
 public class AdminUserFormDto {
 
-    private Integer userId; // For edit mode
+    private Integer userId;
 
     @NotEmpty(message = "First name cannot be empty.")
     @Size(max = 50)
@@ -24,15 +25,14 @@ public class AdminUserFormDto {
     @Size(max = 100)
     private String email;
 
-    @Size(min = 8, message = "Password must be at least 8 characters long.")
-    // For create: required. For edit: optional (if blank, password not changed)
+    @NotEmpty(groups = OnCreate.class, message = "Password is required for new users.")
+    @Size(groups = OnCreate.class, min = 8, message = "Password must be at least 8 characters long for new users.")
     private String password;
 
-    // DepartmentId can be null if Auditor, Director, or Admin role is selected
     private Integer departmentId;
 
     @NotNull(message = "A role must be selected.")
-    private Integer roleId; // Single role ID
+    private Integer roleId;
 
     private boolean formerEmployee = false;
 }

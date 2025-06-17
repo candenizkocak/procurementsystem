@@ -2,11 +2,13 @@ package com.polatholding.procurementsystem.controller;
 
 import com.polatholding.procurementsystem.dto.AdminUserFormDto;
 import com.polatholding.procurementsystem.service.AdminService;
-import jakarta.validation.Valid;
+import com.polatholding.procurementsystem.validation.OnCreate;
+import com.polatholding.procurementsystem.validation.OnUpdate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -36,8 +38,8 @@ public class AdminController {
         return "admin-user-form";
     }
 
-    @PostMapping("/users/save")
-    public String saveNewUser(@Valid @ModelAttribute("userForm") AdminUserFormDto userForm,
+    @PostMapping("/users/save") // This is the CREATE user method
+    public String saveNewUser(@Validated(OnCreate.class) @ModelAttribute("userForm") AdminUserFormDto userForm,
                               BindingResult bindingResult,
                               Model model,
                               RedirectAttributes redirectAttributes) {
@@ -54,7 +56,7 @@ public class AdminController {
             model.addAttribute("departments", adminService.getAllDepartments());
             model.addAttribute("allRoles", adminService.getAllRoles());
             model.addAttribute("isEditMode", false);
-            model.addAttribute("pageErrorMessage", e.getMessage()); // Show specific error like "Email already exists"
+            model.addAttribute("pageErrorMessage", e.getMessage());
             return "admin-user-form";
         } catch (Exception e) {
             model.addAttribute("departments", adminService.getAllDepartments());
@@ -81,8 +83,8 @@ public class AdminController {
         }
     }
 
-    @PostMapping("/users/update")
-    public String updateUser(@Valid @ModelAttribute("userForm") AdminUserFormDto userForm,
+    @PostMapping("/users/update") // This is the UPDATE user method
+    public String updateUser(@Validated(OnUpdate.class) @ModelAttribute("userForm") AdminUserFormDto userForm,
                              BindingResult bindingResult,
                              Model model,
                              RedirectAttributes redirectAttributes) {
@@ -90,6 +92,13 @@ public class AdminController {
         if (userForm.getUserId() == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "User ID is missing for update.");
             return "redirect:/admin/users";
+        }
+
+        // Explicitly check password length if provided during update
+        // This is because the @Size on DTO is only for OnCreate group
+        if (userForm.getPassword() != null && !userForm.getPassword().isEmpty() && userForm.getPassword().length() < 8) {
+            // Add error to BindingResult to display on the form
+            bindingResult.rejectValue("password", "Size.userForm.password", "Password must be at least 8 characters long if provided.");
         }
 
         if (bindingResult.hasErrors()) {
