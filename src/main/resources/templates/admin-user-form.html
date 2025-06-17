@@ -154,70 +154,183 @@
 </div>
 <script th:inline="javascript">
     /*<![CDATA[*/
-    const AUDITOR_ROLE_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).AUDITOR_ROLE_NAME}]]*/ 'Auditor';
-    const DIRECTOR_ROLE_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).DIRECTOR_ROLE_NAME}]]*/ 'Director';
-    const ADMIN_ROLE_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).ADMIN_ROLE_NAME}]]*/ 'Admin';
-    const FINANCE_ROLE_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).FINANCE_ROLE_NAME}]]*/ 'Finance Officer'; // Ensure this matches the constant
-    const FINANCE_DEPARTMENT_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).FINANCE_DEPARTMENT_NAME}]]*/ 'Finance';
+    console.log("Admin User Form JS: Script execution started.");
 
-    const allRolesJs = /*[[${allRoles}]]*/ [];
-    const allDepartmentsJs = /*[[${departments}]]*/ [];
+    // Ensure these are defined before use in DOMContentLoaded
+    const AUDITOR_ROLE_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).AUDITOR_ROLE_NAME}]]*/ null;
+    const DIRECTOR_ROLE_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).DIRECTOR_ROLE_NAME}]]*/ null;
+    const ADMIN_ROLE_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).ADMIN_ROLE_NAME}]]*/ null;
+    const FINANCE_ROLE_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).FINANCE_ROLE_NAME}]]*/ null;
 
-    function handleRoleChange() {
-        const departmentDropdown = document.getElementById('departmentId');
-        const selectedRoleRadio = document.querySelector('input[name="roleId"]:checked');
+    const FINANCE_DEPARTMENT_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).FINANCE_DEPARTMENT_NAME}]]*/ null;
+    const ADMINISTRATION_DEPARTMENT_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).ADMINISTRATION_DEPARTMENT_NAME}]]*/ null;
+    const AUDIT_DEPARTMENT_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).AUDIT_DEPARTMENT_NAME}]]*/ null;
 
-        if (!departmentDropdown) return; // Should not happen
+    const allRolesJsData = /*[[${jsRoles}]]*/ null;
+    const allDepartmentsJsData = /*[[${jsDepartments}]]*/ null;
 
-        if (!selectedRoleRadio) {
-            departmentDropdown.disabled = false;
-            departmentDropdown.required = true; // Default to required if no role picked yet (create mode)
-            return;
+    console.log("Admin User Form JS: Thymeleaf Role Name Constants:", {
+        AUDITOR_ROLE_NAME_JS, DIRECTOR_ROLE_NAME_JS, ADMIN_ROLE_NAME_JS, FINANCE_ROLE_NAME_JS
+    });
+    console.log("Admin User Form JS: Thymeleaf Department Name Constants:", {
+        FINANCE_DEPARTMENT_NAME_JS, ADMINISTRATION_DEPARTMENT_NAME_JS, AUDIT_DEPARTMENT_NAME_JS
+    });
+    console.log("Admin User Form JS: Raw allRolesJsData from Thymeleaf:", allRolesJsData);
+    console.log("Admin User Form JS: Raw allDepartmentsJsData from Thymeleaf:", allDepartmentsJsData);
+
+    // Ensure they are arrays, even if Thymeleaf provides null or malformed data
+    const allRolesJs = Array.isArray(allRolesJsData) ? allRolesJsData : [];
+    const allDepartmentsJs = Array.isArray(allDepartmentsJsData) ? allDepartmentsJsData : [];
+
+    console.log("Admin User Form JS: Processed allRolesJs (should be array):", allRolesJs);
+    console.log("Admin User Form JS: Processed allDepartmentsJs (should be array):", allDepartmentsJs);
+
+
+    function getDepartmentIdByName(deptName) {
+        console.log(`getDepartmentIdByName called for: '${deptName}'`);
+        if (!allDepartmentsJs || allDepartmentsJs.length === 0) {
+            console.error("getDepartmentIdByName: allDepartmentsJs is empty or not an array.");
+            return null;
         }
-
-        const selectedRoleId = parseInt(selectedRoleRadio.value);
-        let selectedRoleName = '';
-        allRolesJs.forEach(function(role) {
-            if (role.roleId === selectedRoleId) {
-                selectedRoleName = role.roleName;
-            }
-        });
-
-        const isGlobalRole = [AUDITOR_ROLE_NAME_JS, DIRECTOR_ROLE_NAME_JS, ADMIN_ROLE_NAME_JS].includes(selectedRoleName);
-        const isFinanceRole = selectedRoleName === FINANCE_ROLE_NAME_JS;
-
-        if (isGlobalRole) {
-            departmentDropdown.value = '';
-            departmentDropdown.disabled = true;
-            departmentDropdown.required = false;
-        } else if (isFinanceRole) {
-            let financeDeptId = null;
-            allDepartmentsJs.forEach(function(dept) {
-                if (dept.departmentName === FINANCE_DEPARTMENT_NAME_JS) {
-                    financeDeptId = dept.departmentId;
-                }
-            });
-            if (financeDeptId) {
-                departmentDropdown.value = financeDeptId;
-                departmentDropdown.disabled = true;
-                departmentDropdown.required = true;
-            } else {
-                console.error("Finance Department ID not found in JS data for department name: " + FINANCE_DEPARTMENT_NAME_JS);
-                departmentDropdown.disabled = false;
-                departmentDropdown.required = true;
-            }
+        const dept = allDepartmentsJs.find(d => d && d.departmentName === deptName); // Added check for d
+        if (dept) {
+            console.log(`Found department: ID=${dept.departmentId}, Name=${dept.departmentName}`);
+            return dept.departmentId;
         } else {
-            departmentDropdown.disabled = false;
-            departmentDropdown.required = true;
-            // If a global/finance role was previously selected and department was cleared,
-            // and now a non-global/non-finance role is selected, the department might be empty.
-            // The 'required' attribute will prompt the user if they try to submit.
+            console.warn(`Department with name '${deptName}' not found in allDepartmentsJs. Current departments:`, JSON.stringify(allDepartmentsJs.map(d => d ? d.departmentName : "null/undefined department object")));
+            return null;
         }
     }
 
+    function handleRoleChange() {
+        console.log("handleRoleChange function invoked.");
+        const departmentDropdown = document.getElementById('departmentId');
+        const selectedRoleRadio = document.querySelector('input[name="roleId"]:checked');
+
+        if (!departmentDropdown) {
+            console.error("CRITICAL: Department dropdown element with ID 'departmentId' not found in the DOM!");
+            return;
+        }
+        // console.log("Department dropdown element found:", departmentDropdown);
+
+        if (!selectedRoleRadio) {
+            console.log("No role radio button is currently checked. Setting department dropdown to enabled and required by default.");
+            departmentDropdown.disabled = false;
+            departmentDropdown.required = true;
+            // departmentDropdown.value = ''; // Optionally clear if no role is selected
+            return;
+        }
+        // console.log("Selected role radio element found:", selectedRoleRadio);
+
+        const selectedRoleId = parseInt(selectedRoleRadio.value);
+        // console.log("Parsed selectedRoleId from radio value:", selectedRoleId);
+
+        if (isNaN(selectedRoleId)) {
+            console.error("Selected role ID is NaN. Value from radio was:", selectedRoleRadio.value);
+            return;
+        }
+
+        const selectedRole = allRolesJs.find(role => role && role.roleId === selectedRoleId); // Added check for role
+        if (!selectedRole) {
+            console.warn(`Role with ID ${selectedRoleId} not found in allRolesJs. This could be due to allRolesJs not being populated correctly or a mismatch.`);
+            console.log("Available roles in allRolesJs:", JSON.stringify(allRolesJs));
+            departmentDropdown.disabled = false;
+            departmentDropdown.required = true;
+            return;
+        }
+        const selectedRoleName = selectedRole.roleName;
+        console.log(`Selected Role Details: ID=${selectedRoleId}, Name='${selectedRoleName}'`);
+
+        // Default state before applying rules
+        departmentDropdown.disabled = false;
+        departmentDropdown.required = true;
+        let departmentToSetValue = departmentDropdown.value; // Preserve current selection unless overridden
+
+        if (selectedRoleName === DIRECTOR_ROLE_NAME_JS) {
+            console.log(`Applying Director role logic for '${selectedRoleName}'`);
+            departmentToSetValue = ''; // Clear selection for Director
+            departmentDropdown.disabled = true;
+            departmentDropdown.required = false;
+        } else if (selectedRoleName === FINANCE_ROLE_NAME_JS) {
+            console.log(`Applying Finance Officer role logic for '${selectedRoleName}'`);
+            const financeDeptId = getDepartmentIdByName(FINANCE_DEPARTMENT_NAME_JS);
+            if (financeDeptId !== null) {
+                departmentToSetValue = financeDeptId.toString(); // Ensure value is string for select
+                departmentDropdown.disabled = true;
+            } else {
+                console.error(`Finance Department ('${FINANCE_DEPARTMENT_NAME_JS}') ID not found. Department dropdown will remain enabled.`);
+                departmentToSetValue = ''; // Clear if specific department is not found
+            }
+        } else if (selectedRoleName === ADMIN_ROLE_NAME_JS) {
+            console.log(`Applying Admin role logic for '${selectedRoleName}'`);
+            const adminDeptId = getDepartmentIdByName(ADMINISTRATION_DEPARTMENT_NAME_JS);
+            if (adminDeptId !== null) {
+                departmentToSetValue = adminDeptId.toString();
+                departmentDropdown.disabled = true;
+            } else {
+                console.error(`Administration Department ('${ADMINISTRATION_DEPARTMENT_NAME_JS}') ID not found. Department dropdown will remain enabled.`);
+                departmentToSetValue = '';
+            }
+        } else if (selectedRoleName === AUDITOR_ROLE_NAME_JS) {
+            console.log(`Applying Auditor role logic for '${selectedRoleName}'`);
+            const auditDeptId = getDepartmentIdByName(AUDIT_DEPARTMENT_NAME_JS);
+            if (auditDeptId !== null) {
+                departmentToSetValue = auditDeptId.toString();
+                departmentDropdown.disabled = true;
+            } else {
+                console.error(`Audit Department ('${AUDIT_DEPARTMENT_NAME_JS}') ID not found. Department dropdown will remain enabled.`);
+                departmentToSetValue = '';
+            }
+        } else {
+            console.log(`Role '${selectedRoleName}' does not have special department handling. Department dropdown remains enabled and required.`);
+            // If departmentToSetValue is '' (e.g., user cleared it manually) and dropdown is required, HTML5 validation will catch it.
+            if (departmentDropdown.value === '' && departmentDropdown.required) {
+                console.log("Role requires a department, and the dropdown is currently empty. User needs to select one.");
+            }
+        }
+
+        departmentDropdown.value = departmentToSetValue; // Set value *after* potentially disabling
+        console.log(`Final department dropdown state: value='${departmentDropdown.value}', disabled=${departmentDropdown.disabled}, required=${departmentDropdown.required}`);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-        handleRoleChange();
+        console.log("Admin User Form JS: DOMContentLoaded event fired.");
+
+        if (allRolesJs.length === 0) {
+            console.warn("allRolesJs is empty. Role-dependent logic might not work correctly.");
+        }
+        if (allDepartmentsJs.length === 0) {
+            console.warn("allDepartmentsJs is empty. Department assignment logic might not work correctly.");
+        }
+
+        try {
+            console.log("Attempting initial call to handleRoleChange().");
+            handleRoleChange();
+            console.log("Initial call to handleRoleChange() completed.");
+        } catch (e) {
+            console.error("Error during initial handleRoleChange call:", e);
+        }
+
+        const roleRadios = document.querySelectorAll('input[name="roleId"]');
+        if (roleRadios.length > 0) {
+            console.log(`Found ${roleRadios.length} role radio buttons. Attaching event listeners.`);
+            roleRadios.forEach((radio, index) => {
+                radio.addEventListener('change', function() {
+                    console.log(`Role radio button #${index+1} (value: ${this.value}, ID: ${this.id}) changed.`);
+                    try {
+                        handleRoleChange();
+                    } catch (e) {
+                        console.error("Error during handleRoleChange on radio change event:", e);
+                    }
+                });
+            });
+        } else {
+            console.warn("No role radio buttons found with name 'roleId'. The 'change' event listener will not be attached.");
+        }
+        console.log("Admin User Form JS: Event listeners setup (if any radios found) complete.");
     });
+
+    console.log("Admin User Form JS: Script execution finished defining functions and listeners.");
     /*]]>*/
 </script>
 <script th:src="@{/js/notifications.js}"></script>
