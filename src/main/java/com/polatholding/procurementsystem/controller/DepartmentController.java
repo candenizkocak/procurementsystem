@@ -74,4 +74,15 @@ public class DepartmentController {
         redirectAttributes.addFlashAttribute("successMessage", "Department updated successfully.");
         return "redirect:/admin/departments";
     }
+
+    @PostMapping("/delete/{id}")
+    public String deleteDepartment(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+        boolean deleted = departmentService.deleteDepartment(id);
+        if (deleted) {
+            redirectAttributes.addFlashAttribute("successMessage", "Department deleted successfully.");
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "Department has active employees and cannot be deleted.");
+        }
+        return "redirect:/admin/departments";
+    }
 }

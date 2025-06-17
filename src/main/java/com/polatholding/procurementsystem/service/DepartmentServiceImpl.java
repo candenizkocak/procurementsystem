@@ -3,7 +3,9 @@ package com.polatholding.procurementsystem.service;
 import com.polatholding.procurementsystem.dto.DepartmentDto;
 import com.polatholding.procurementsystem.dto.DepartmentFormDto;
 import com.polatholding.procurementsystem.model.Department;
+import com.polatholding.procurementsystem.model.User;
 import com.polatholding.procurementsystem.repository.DepartmentRepository;
+import com.polatholding.procurementsystem.repository.UserRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,9 +17,11 @@ import java.util.stream.Collectors;
 public class DepartmentServiceImpl implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
+    private final UserRepository userRepository;
 
-    public DepartmentServiceImpl(DepartmentRepository departmentRepository) {
+    public DepartmentServiceImpl(DepartmentRepository departmentRepository, UserRepository userRepository) {
         this.departmentRepository = departmentRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -54,6 +58,26 @@ public class DepartmentServiceImpl implements DepartmentService {
         dept.setDepartmentName(formDto.getDepartmentName());
         dept.setManagerUserId(formDto.getManagerUserId());
         departmentRepository.save(dept);
+    }
+
+    @Override
+    @Transactional
+    public boolean deleteDepartment(Integer id) {
+        // Check if department has active employees first
+        if (hasDepartmentActiveEmployees(id)) {
+            return false; // Cannot delete department with active employees
+        }
+
+        departmentRepository.deleteById(id);
+        return true;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasDepartmentActiveEmployees(Integer id) {
+        // Find users in this department who are not former employees
+        List<User> activeEmployees = userRepository.findByDepartment_DepartmentIdAndFormerEmployeeFalse(id);
+        return !activeEmployees.isEmpty();
     }
 
     private DepartmentDto convertToDto(Department department) {

@@ -125,4 +125,15 @@ public class AdminController {
         }
         return "redirect:/admin/users";
     }
+
+    @PostMapping("/users/toggle-status/{id}")
+    public String toggleUserActiveStatus(@PathVariable("id") Integer userId, RedirectAttributes redirectAttributes) {
+        try {
+            adminService.toggleUserActiveStatus(userId);
+            redirectAttributes.addFlashAttribute("successMessage", "User status toggled successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to toggle user status: " + e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
 }

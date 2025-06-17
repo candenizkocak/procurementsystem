@@ -30,7 +30,10 @@ public class DatabaseHelperRepositoryImpl implements DatabaseHelperRepository {
 
     @Override
     public void addUser(String firstName, String lastName, String email, String passwordHash, Integer departmentId) {
-        jdbcTemplate.update("EXEC sp_AddUser ?,?,?,?,?", firstName, lastName, email, passwordHash, departmentId);
+        // The stored procedure seems to have fewer parameters than we're sending
+        // Let's directly insert into the Users table instead
+        String sql = "INSERT INTO Users (FirstName, LastName, Email, PasswordHash, DepartmentID, CreatedAt, FormerEmployee) VALUES (?, ?, ?, ?, ?, GETDATE(), 0)";
+        jdbcTemplate.update(sql, firstName, lastName, email, passwordHash, departmentId);
     }
 
     @Override

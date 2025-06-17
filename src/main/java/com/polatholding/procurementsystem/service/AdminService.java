@@ -17,6 +17,6 @@ public interface AdminService {
     AdminUserFormDto getUserFormById(Integer userId);
     void updateUser(AdminUserFormDto userFormDto);
 
-    // Method for deactivating/activating user
-    // void setUserStatus(Integer userId, boolean isFormer); // We can add this next
+    // Method for toggling user's active status
+    void toggleUserActiveStatus(Integer userId);
 }

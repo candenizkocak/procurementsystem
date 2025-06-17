@@ -332,4 +332,15 @@ public class AdminServiceImpl implements AdminService {
         userRepository.save(userToUpdate);
         System.out.println("DEBUG updateUser: User updated successfully. UserID: " + userToUpdate.getUserId());
     }
+
+    @Override
+    @Transactional
+    public void toggleUserActiveStatus(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+
+        // Toggle the formerEmployee flag
+        user.setFormerEmployee(!user.isFormerEmployee());
+        userRepository.save(user);
+    }
 }
