@@ -1,6 +1,7 @@
 package com.polatholding.procurementsystem.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -27,5 +28,6 @@ public class Department {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ManagerUserID", referencedColumnName = "UserID") // This is the actual mapping
+    @JsonIgnore
     private User managerUser;
 }
