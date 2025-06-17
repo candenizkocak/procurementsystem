@@ -9,6 +9,6 @@ public class SupplierDto {
     private String contactPerson;
     private String email;
     private String phone;
-    private String address;
+    private String description;
     private String status;
 }

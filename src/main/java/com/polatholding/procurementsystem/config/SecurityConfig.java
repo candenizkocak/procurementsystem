@@ -27,7 +27,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/error", "/error/403").permitAll() // Permit access to the error pages
+                        .requestMatchers("/login", "/css/**", "/js/**", "/images/**", "/error", "/error/403").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -36,19 +36,16 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/dashboard", true)
                         .permitAll()
                 )
-                .rememberMe(rememberMe -> rememberMe.key("aSecretKeyToRememberUsers"))
+
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()
                 )
                 .csrf(csrf -> csrf.disable())
-                // --- THIS IS THE FIX ---
-                // Add custom exception handling for access denied errors.
                 .exceptionHandling(exceptions -> exceptions
-                        .accessDeniedPage("/error/403") // Redirect to our custom controller endpoint
+                        .accessDeniedPage("/error/403")
                 );
-        // ---------------------
 
         return http.build();
     }

@@ -89,11 +89,11 @@
                     </div>
 
                     <div class="form-section">
-                        <h3>Address Information</h3>
+                        <h3>Supplier Description</h3>
                         <div class="form-group">
-                            <label for="address">Address</label>
-                            <textarea id="address" th:field="*{address}" rows="3" style="min-height: auto; resize: vertical;"></textarea>
-                            <small class="text-danger" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></small>
+                            <label for="description">Description</label>
+                            <textarea id="description" th:field="*{description}" rows="3" style="min-height: auto; resize: vertical;"></textarea>
+                            <small class="text-danger" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></small>
                         </div>
                     </div>
 

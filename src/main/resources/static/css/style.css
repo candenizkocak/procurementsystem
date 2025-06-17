@@ -443,6 +443,7 @@ body {
 /* Item Table Styles */
 .item-table {
     width: 100%;
+    table-layout: fixed; /* Fixed table layout to respect column widths */
     border-collapse: collapse;
     margin-top: 15px;
 }
@@ -450,6 +451,7 @@ body {
     padding: 8px;
     text-align: left;
     border: 1px solid var(--polat-medium-gray);
+    overflow: hidden; /* Prevent content overflow */
 }
 .item-table th {
     background-color: #f8f9fa;
@@ -460,6 +462,8 @@ body {
     padding: 8px;
     border: 1px solid #ced4da;
     border-radius: 4px;
+    box-sizing: border-box; /* Include padding in width calculation */
+    max-width: 100%; /* Prevent input from exceeding cell width */
 }
 .item-table td.actions-cell {
     width: 100px;
