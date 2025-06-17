@@ -65,6 +65,9 @@
                     <td th:text="${dept.departmentName}"></td>
                     <td>
                         <a th:href="@{/admin/departments/edit/{id}(id=${dept.departmentId})}" class="btn btn-warning btn-sm">Edit</a>
+                        <form th:action="@{/admin/departments/delete/{id}(id=${dept.departmentId})}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete department?');">Delete</button>
+                        </form>
                     </td>
                 </tr>
                 </tbody>

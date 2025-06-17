@@ -30,7 +30,10 @@ public class DatabaseHelperRepositoryImpl implements DatabaseHelperRepository {
 
     @Override
     public void addUser(String firstName, String lastName, String email, String passwordHash, Integer departmentId) {
-        jdbcTemplate.update("EXEC sp_AddUser ?,?,?,?,?", firstName, lastName, email, passwordHash, departmentId);
+        jdbcTemplate.update("EXEC sp_AddUser ?,?,?,?", firstName, lastName, email, passwordHash);
+        if (departmentId != null) {
+            jdbcTemplate.update("UPDATE Users SET DepartmentID=? WHERE Email=?", departmentId, email);
+        }
     }
 
     @Override

@@ -10,4 +10,5 @@ public interface DepartmentService {
     void createDepartment(DepartmentFormDto formDto);
     DepartmentFormDto getDepartmentFormById(Integer id);
     void updateDepartment(Integer id, DepartmentFormDto formDto);
+    void deleteDepartment(Integer id);
 }

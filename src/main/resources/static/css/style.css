@@ -119,32 +119,6 @@ body {
     color: var(--polat-accent-blue);
 }
 
-.form-options {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    font-size: 14px;
-}
-
-.form-options .remember-me {
-    display: flex;
-    align-items: center;
-}
-
-.form-options label {
-    margin-left: 5px;
-    color: #666;
-}
-
-.form-options a {
-    color: var(--polat-accent-blue);
-    text-decoration: none;
-}
-
-.form-options a:hover {
-    text-decoration: underline;
-}
 
 .btn-login {
     width: 100%;
@@ -445,6 +419,7 @@ body {
     width: 100%;
     border-collapse: collapse;
     margin-top: 15px;
+    table-layout: fixed;
 }
 .item-table th, .item-table td {
     padding: 8px;
@@ -460,6 +435,7 @@ body {
     padding: 8px;
     border: 1px solid #ced4da;
     border-radius: 4px;
+    min-width: 0;
 }
 .item-table td.actions-cell {
     width: 100px;

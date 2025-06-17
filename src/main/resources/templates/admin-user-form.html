@@ -159,6 +159,8 @@
     const ADMIN_ROLE_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).ADMIN_ROLE_NAME}]]*/ 'Admin';
     const FINANCE_ROLE_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).FINANCE_ROLE_NAME}]]*/ 'Finance Officer'; // Ensure this matches the constant
     const FINANCE_DEPARTMENT_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).FINANCE_DEPARTMENT_NAME}]]*/ 'Finance';
+    const ADMIN_DEPARTMENT_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).ADMIN_DEPARTMENT_NAME}]]*/ 'Administration';
+    const AUDIT_DEPARTMENT_NAME_JS = /*[[${T(com.polatholding.procurementsystem.service.AdminServiceImpl).AUDIT_DEPARTMENT_NAME}]]*/ 'Audit';
 
     const allRolesJs = /*[[${allRoles}]]*/ [];
     const allDepartmentsJs = /*[[${departments}]]*/ [];
@@ -183,13 +185,36 @@
             }
         });
 
-        const isGlobalRole = [AUDITOR_ROLE_NAME_JS, DIRECTOR_ROLE_NAME_JS, ADMIN_ROLE_NAME_JS].includes(selectedRoleName);
         const isFinanceRole = selectedRoleName === FINANCE_ROLE_NAME_JS;
 
-        if (isGlobalRole) {
+        if (selectedRoleName === DIRECTOR_ROLE_NAME_JS) {
             departmentDropdown.value = '';
             departmentDropdown.disabled = true;
             departmentDropdown.required = false;
+        } else if (selectedRoleName === ADMIN_ROLE_NAME_JS) {
+            let deptId = null;
+            allDepartmentsJs.forEach(function(dept) {
+                if (dept.departmentName === ADMIN_DEPARTMENT_NAME_JS) {
+                    deptId = dept.departmentId;
+                }
+            });
+            if (deptId) {
+                departmentDropdown.value = deptId;
+                departmentDropdown.disabled = true;
+                departmentDropdown.required = true;
+            }
+        } else if (selectedRoleName === AUDITOR_ROLE_NAME_JS) {
+            let deptId = null;
+            allDepartmentsJs.forEach(function(dept) {
+                if (dept.departmentName === AUDIT_DEPARTMENT_NAME_JS) {
+                    deptId = dept.departmentId;
+                }
+            });
+            if (deptId) {
+                departmentDropdown.value = deptId;
+                departmentDropdown.disabled = true;
+                departmentDropdown.required = true;
+            }
         } else if (isFinanceRole) {
             let financeDeptId = null;
             allDepartmentsJs.forEach(function(dept) {

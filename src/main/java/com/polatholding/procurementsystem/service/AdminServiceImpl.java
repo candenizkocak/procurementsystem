@@ -36,6 +36,8 @@ public class AdminServiceImpl implements AdminService {
     // Department Names - Ensure these EXACTLY match DepartmentName in your Departments TABLE
     private static final String PROCUREMENT_DEPARTMENT_NAME = "Procurement";
     public static final String FINANCE_DEPARTMENT_NAME = "Finance";
+    public static final String ADMIN_DEPARTMENT_NAME = "Administration";
+    public static final String AUDIT_DEPARTMENT_NAME = "Audit";
 
     // Other Role Names
     static final String MANAGER_ROLE_NAME = "Manager"; // Base Manager role
@@ -137,14 +139,23 @@ public class AdminServiceImpl implements AdminService {
         Role finalRoleToAssign = originallySelectedRoleOnForm;
         String selectedRoleName = originallySelectedRoleOnForm.getRoleName();
 
-        if (AUDITOR_ROLE_NAME.equals(selectedRoleName) ||
-                DIRECTOR_ROLE_NAME.equals(selectedRoleName) ||
-                ADMIN_ROLE_NAME.equals(selectedRoleName)) {
-            System.out.println("DEBUG createUser: Matched a global role: " + selectedRoleName);
+        if (DIRECTOR_ROLE_NAME.equals(selectedRoleName)) {
+            System.out.println("DEBUG createUser: Director role - no department.");
             finalDepartmentToAssign = null;
-            if (userFormDto.getDepartmentId() != null) {
-                System.out.println("WARN createUser: Department selection '" + userFormDto.getDepartmentId() + "' ignored for global role: " + selectedRoleName);
-            }
+        }
+        else if (ADMIN_ROLE_NAME.equals(selectedRoleName)) {
+            Department adminDept = departmentRepository.findAll().stream()
+                    .filter(d -> ADMIN_DEPARTMENT_NAME.equals(d.getDepartmentName()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Critical: 'Administration' department not found."));
+            finalDepartmentToAssign = adminDept;
+        }
+        else if (AUDITOR_ROLE_NAME.equals(selectedRoleName)) {
+            Department auditDept = departmentRepository.findAll().stream()
+                    .filter(d -> AUDIT_DEPARTMENT_NAME.equals(d.getDepartmentName()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Critical: 'Audit' department not found."));
+            finalDepartmentToAssign = auditDept;
         }
         else if (FINANCE_ROLE_NAME.equals(selectedRoleName)) {
             System.out.println("DEBUG createUser: Matched FINANCE_ROLE_NAME ('" + selectedRoleName + "'). Forcing Finance department.");
@@ -286,11 +297,23 @@ public class AdminServiceImpl implements AdminService {
         Role finalRoleToAssign = originallySelectedRoleOnForm;
         String selectedRoleName = originallySelectedRoleOnForm.getRoleName();
 
-        if (AUDITOR_ROLE_NAME.equals(selectedRoleName) ||
-                DIRECTOR_ROLE_NAME.equals(selectedRoleName) ||
-                ADMIN_ROLE_NAME.equals(selectedRoleName)) {
-            System.out.println("DEBUG updateUser: Matched a global role: " + selectedRoleName);
+        if (DIRECTOR_ROLE_NAME.equals(selectedRoleName)) {
+            System.out.println("DEBUG updateUser: Director role - no department.");
             finalDepartmentToAssign = null;
+        }
+        else if (ADMIN_ROLE_NAME.equals(selectedRoleName)) {
+            Department adminDept = departmentRepository.findAll().stream()
+                    .filter(d -> ADMIN_DEPARTMENT_NAME.equals(d.getDepartmentName()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Critical: 'Administration' department not found."));
+            finalDepartmentToAssign = adminDept;
+        }
+        else if (AUDITOR_ROLE_NAME.equals(selectedRoleName)) {
+            Department auditDept = departmentRepository.findAll().stream()
+                    .filter(d -> AUDIT_DEPARTMENT_NAME.equals(d.getDepartmentName()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Critical: 'Audit' department not found."));
+            finalDepartmentToAssign = auditDept;
         }
         else if (FINANCE_ROLE_NAME.equals(selectedRoleName)) {
             System.out.println("DEBUG updateUser: Matched FINANCE_ROLE_NAME. Forcing Finance department.");

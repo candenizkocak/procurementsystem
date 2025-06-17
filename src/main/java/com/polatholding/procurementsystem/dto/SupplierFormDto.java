@@ -24,6 +24,6 @@ public class SupplierFormDto {
     @Size(max = 30, message = "Phone number cannot exceed 30 characters.")
     private String phone;
 
-    @Size(max = 200, message = "Address cannot exceed 200 characters.")
-    private String address;
+    @Size(max = 200, message = "Description cannot exceed 200 characters.")
+    private String description;
 }

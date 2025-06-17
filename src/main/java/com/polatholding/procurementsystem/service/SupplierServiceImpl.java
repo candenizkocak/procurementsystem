@@ -105,7 +105,7 @@ public class SupplierServiceImpl implements SupplierService {
         supplierToUpdate.setContactPerson(formDto.getContactPerson());
         supplierToUpdate.setEmail(formDto.getEmail());
         supplierToUpdate.setPhone(formDto.getPhone());
-        supplierToUpdate.setAddress(formDto.getAddress());
+        supplierToUpdate.setDescription(formDto.getDescription());
         supplierRepository.save(supplierToUpdate);
     }
 }

@@ -74,4 +74,15 @@ public class DepartmentController {
         redirectAttributes.addFlashAttribute("successMessage", "Department updated successfully.");
         return "redirect:/admin/departments";
     }
+
+    @PostMapping("/delete/{id}")
+    public String deleteDepartment(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+        try {
+            departmentService.deleteDepartment(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Department deleted successfully.");
+        } catch (IllegalStateException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/admin/departments";
+    }
 }

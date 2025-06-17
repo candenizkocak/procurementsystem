@@ -28,8 +28,8 @@
             sec:authorize="hasAnyRole('Finance Officer', 'Auditor')">
             <a th:href="@{/budgets}">Budgets</a>
         </li>
-        <li class="nav-item" th:classappend="${#strings.startsWith(currentUrl, '/reports')} ? 'active' : ''"
-            sec:authorize="hasAnyRole('Finance Officer', 'ProcurementManager', 'Auditor')">
+        <li class="nav-item" th:classappend="${#strings.startsWith(currentUrl, '/reports')} ? 'active' : ''" 
+            sec:authorize="hasAnyRole('Finance Officer', 'ProcurementManager', 'Auditor', 'Director')">
             <a th:href="@{/reports/budget-status}">Reports</a>
         </li>
         <li class="nav-item" th:classappend="${#strings.startsWith(currentUrl, '/admin/users')} ? 'active' : ''"

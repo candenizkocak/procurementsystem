@@ -4,6 +4,7 @@ import com.polatholding.procurementsystem.dto.DepartmentDto;
 import com.polatholding.procurementsystem.dto.DepartmentFormDto;
 import com.polatholding.procurementsystem.model.Department;
 import com.polatholding.procurementsystem.repository.DepartmentRepository;
+import com.polatholding.procurementsystem.repository.UserRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,9 +16,12 @@ import java.util.stream.Collectors;
 public class DepartmentServiceImpl implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
+    private final UserRepository userRepository;
 
-    public DepartmentServiceImpl(DepartmentRepository departmentRepository) {
+    public DepartmentServiceImpl(DepartmentRepository departmentRepository,
+                                 UserRepository userRepository) {
         this.departmentRepository = departmentRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -54,6 +58,15 @@ public class DepartmentServiceImpl implements DepartmentService {
         dept.setDepartmentName(formDto.getDepartmentName());
         dept.setManagerUserId(formDto.getManagerUserId());
         departmentRepository.save(dept);
+    }
+
+    @Override
+    @Transactional
+    public void deleteDepartment(Integer id) {
+        if (userRepository.existsByDepartment_DepartmentIdAndFormerEmployeeFalse(id)) {
+            throw new IllegalStateException("Department has active employees.");
+        }
+        departmentRepository.deleteById(id);
     }
 
     private DepartmentDto convertToDto(Department department) {
