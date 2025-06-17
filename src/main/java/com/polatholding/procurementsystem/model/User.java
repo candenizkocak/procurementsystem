@@ -1,7 +1,7 @@
 package com.polatholding.procurementsystem.model;
 
 import jakarta.persistence.*;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -59,6 +59,6 @@ public class User {
     private boolean formerEmployee = false;
 
     @OneToMany(mappedBy = "managerUser", fetch = FetchType.LAZY)
-    @JsonIgnore
+    @JsonManagedReference
     private List<Department> managedDepartments = new ArrayList<>(); // Initialize to avoid NPE
 }
