@@ -16,7 +16,7 @@ public interface SupplierRepository extends JpaRepository<Supplier, Integer> {
     List<Supplier> findByStatusOrderBySupplierNameAsc(String status);
 
     @Query(value = "SELECT s.* FROM Suppliers s " +
-            "WHERE FREETEXT((s.SupplierName, s.ContactPerson, s.Address), :searchTerm) " +
+            "WHERE FREETEXT((s.SupplierName, s.ContactPerson, s.Description), :searchTerm) " +
             "AND s.Status = 'Active'",
             nativeQuery = true)
     List<Supplier> searchByFreetext(@Param("searchTerm") String searchTerm);
