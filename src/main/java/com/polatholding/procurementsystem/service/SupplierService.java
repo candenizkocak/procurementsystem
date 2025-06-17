@@ -16,6 +16,8 @@ public interface SupplierService {
 
     void rejectSupplier(Integer supplierId);
 
+    void toggleSupplierStatus(Integer supplierId);
+
     List<SupplierDto> searchSuppliers(String searchTerm);
 
     SupplierFormDto getSupplierFormById(Integer supplierId);

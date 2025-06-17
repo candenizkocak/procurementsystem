@@ -90,14 +90,28 @@
                     <td>
                         <span class="status-badge"
                               th:classappend="${#strings.toLowerCase(supplier.status) == 'pending' ? 'status-pending' :
-                                             (#strings.toLowerCase(supplier.status) == 'active' ? 'status-approved' : 'status-rejected')}"
+                                             (#strings.toLowerCase(supplier.status) == 'active' ? 'status-approved' :
+                                             (#strings.toLowerCase(supplier.status) == 'inactive' ? 'status-inactive' : 'status-rejected'))}"
                               th:text="${supplier.status}">
                         </span>
                     </td>
                     <td>
                         <a th:href="@{/suppliers/{id}/edit(id=${supplier.supplierId})}" class="btn btn-warning btn-sm"
                            sec:authorize="@securityHelper.isProcurementStaff(authentication)">Edit</a>
-                        <div class="actions-container" th:if="${#strings.equals(supplier.status, 'Pending')}" sec:authorize="hasRole('ProcurementManager')">
+
+                        <!-- Status toggle button for Active/Inactive suppliers -->
+                        <div class="actions-container" th:if="${#strings.equals(supplier.status, 'Active') || #strings.equals(supplier.status, 'Inactive')}"
+                             sec:authorize="@securityHelper.isProcurementStaff(authentication)" style="display: inline;">
+                            <form th:action="@{/suppliers/toggle-status/{id}(id=${supplier.supplierId})}" method="post" style="display: inline;">
+                                <button type="submit" class="btn btn-sm"
+                                        th:classappend="${#strings.equals(supplier.status, 'Active') ? 'btn-secondary' : 'btn-success'}"
+                                        th:text="${#strings.equals(supplier.status, 'Active') ? 'Set Inactive' : 'Set Active'}">
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Approve/Reject buttons for Pending suppliers -->
+                        <div class="actions-container" th:if="${#strings.equals(supplier.status, 'Pending')}" sec:authorize="@securityHelper.isProcurementStaff(authentication)">
                             <form th:action="@{/suppliers/approve/{id}(id=${supplier.supplierId})}" method="post" style="display: inline;">
                                 <button type="submit" class="btn btn-success btn-sm">Approve</button>
                             </form>

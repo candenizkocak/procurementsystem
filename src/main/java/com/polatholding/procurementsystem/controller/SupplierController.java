@@ -88,7 +88,7 @@ public class SupplierController {
     }
 
     @PostMapping("/approve/{id}")
-    @PreAuthorize("hasRole('ProcurementManager')")
+    @PreAuthorize("@securityHelper.isProcurementStaff(authentication)")
     public String approveSupplier(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
         supplierService.approveSupplier(id);
         redirectAttributes.addFlashAttribute("successMessage", "Supplier approved and is now active.");
@@ -96,10 +96,18 @@ public class SupplierController {
     }
 
     @PostMapping("/reject/{id}")
-    @PreAuthorize("hasRole('ProcurementManager')")
+    @PreAuthorize("@securityHelper.isProcurementStaff(authentication)")
     public String rejectSupplier(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
         supplierService.rejectSupplier(id);
         redirectAttributes.addFlashAttribute("successMessage", "Supplier has been rejected.");
+        return "redirect:/suppliers";
+    }
+
+    @PostMapping("/toggle-status/{id}")
+    @PreAuthorize("@securityHelper.isProcurementStaff(authentication)")
+    public String toggleSupplierStatus(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+        supplierService.toggleSupplierStatus(id);
+        redirectAttributes.addFlashAttribute("successMessage", "Supplier status has been updated.");
         return "redirect:/suppliers";
     }
 }

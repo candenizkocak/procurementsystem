@@ -63,11 +63,13 @@ public class SupplierServiceImpl implements SupplierService {
     @Override
     @Transactional(readOnly = true)
     public List<SupplierDto> getAllSuppliers() {
-        // THE FIX: Calling the renamed repository method.
         List<Supplier> activeSuppliers = supplierRepository.findByStatusOrderBySupplierNameAsc("Active");
         List<Supplier> pendingSuppliers = supplierRepository.findByStatus("Pending");
+        List<Supplier> inactiveSuppliers = supplierRepository.findByStatus("Inactive");
 
-        return Stream.concat(pendingSuppliers.stream(), activeSuppliers.stream())
+        return Stream.concat(
+                Stream.concat(pendingSuppliers.stream(), activeSuppliers.stream()),
+                inactiveSuppliers.stream())
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
@@ -107,5 +109,22 @@ public class SupplierServiceImpl implements SupplierService {
         supplierToUpdate.setPhone(formDto.getPhone());
         supplierToUpdate.setDescription(formDto.getDescription());
         supplierRepository.save(supplierToUpdate);
+    }
+
+    @Override
+    @Transactional
+    public void toggleSupplierStatus(Integer supplierId) {
+        Supplier supplier = supplierRepository.findById(supplierId)
+                .orElseThrow(() -> new RuntimeException("Supplier not found: " + supplierId));
+
+        // Toggle between Active and Inactive
+        if ("Active".equals(supplier.getStatus())) {
+            supplier.setStatus("Inactive");
+        } else if ("Inactive".equals(supplier.getStatus())) {
+            supplier.setStatus("Active");
+        }
+        // If status is Pending or Rejected, don't change it
+
+        supplierRepository.save(supplier);
     }
 }
