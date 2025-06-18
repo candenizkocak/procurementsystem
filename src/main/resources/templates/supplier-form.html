@@ -2,7 +2,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${isEditMode} ? 'Edit Supplier' : 'New Supplier'"></title>
+    <title th:text="${isEditMode} ? 'Edit Supplier' : 'New Supplier'">Supplier Form</title>
+    <link rel="shortcut icon" th:href="@{/favicon/favicon.png}" type="image/png">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body style="overflow-y: hidden">
